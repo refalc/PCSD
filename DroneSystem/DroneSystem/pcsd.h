@@ -1,6 +1,6 @@
 #include <vector>
 #include <map>
-
+#include <QUdpSocket>
 
 typedef int address;
 typedef int scene;
@@ -11,14 +11,17 @@ class DroneSystem
 {
 public:
 
-	DroneSystem(address init_space, address syn_space, address coord_space);
+    DroneSystem(address init_space, address syn_space, address coord_space, int ID);
 	int InitSys();
-	
+    void PrintIDs();
 private:
 	//address data
 	address m_InitSpace;
 	address m_SynSpace;
 	address m_CoordSpace;
+
+    QUdpSocket *udpSocket;
+    int port;
 	
 	//drone system data
 	int m_ID;
@@ -31,7 +34,4 @@ private:
 	
 	//work data
 	scene m_CurrScene;
-	
-	
-	
-}
+};
