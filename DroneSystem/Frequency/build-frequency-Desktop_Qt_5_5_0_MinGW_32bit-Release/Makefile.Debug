@@ -165,25 +165,6 @@ debug/moc_frequency.cpp: ../../../../Qt/5.5/mingw492_32/include/QtCore/QObject \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qcontainerfwd.h \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qisenum.h \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qobject_impl.h \
-		E:/soft/PCSD/DroneSystem/UDPSocket/udpsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/QUdpSocket \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qudpsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qabstractsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qiodevice.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qdebug.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qhash.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qpair.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qmap.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qtextstream.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qlocale.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qvariant.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qshareddata.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qvector.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qpoint.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qset.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qcontiguouscache.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qhostaddress.h \
-		E:/soft/PCSD/DroneSystem/Utils/Utils/utils.h \
 		../frequency/frequency.h
 	'E:\soft\Qt\5.5\mingw492_32\bin\moc.exe' $(DEFINES) -D__GNUC__ -DWIN32 -IE:/soft/Qt/5.5/mingw492_32/mkspecs/win32-g++ -IE:/soft/PCSD/DroneSystem/Frequency/frequency -IE:/soft/Qt/5.5/mingw492_32/include -IE:/soft/Qt/5.5/mingw492_32/include/QtNetwork -IE:/soft/Qt/5.5/mingw492_32/include/QtCore -I. ../frequency/frequency.h -o debug/moc_frequency.cpp
 
@@ -257,26 +238,7 @@ debug/main.o: ../frequency/main.cpp ../../../../Qt/5.5/mingw492_32/include/QtCor
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qobject_impl.h \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qeventloop.h \
 		../frequency/frequency.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/QObject \
-		E:/soft/PCSD/DroneSystem/UDPSocket/udpsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/QUdpSocket \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qudpsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qabstractsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qiodevice.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qdebug.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qhash.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qpair.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qmap.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qtextstream.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qlocale.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qvariant.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qshareddata.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qvector.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qpoint.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qset.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qcontiguouscache.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qhostaddress.h \
-		E:/soft/PCSD/DroneSystem/Utils/Utils/utils.h
+		../../../../Qt/5.5/mingw492_32/include/QtCore/QObject
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/main.o ../frequency/main.cpp
 
 debug/frequency.o: ../frequency/frequency.cpp ../frequency/frequency.h \
@@ -332,26 +294,7 @@ debug/frequency.o: ../frequency/frequency.cpp ../frequency/frequency.h \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qvarlengtharray.h \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qcontainerfwd.h \
 		../../../../Qt/5.5/mingw492_32/include/QtCore/qisenum.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qobject_impl.h \
-		E:/soft/PCSD/DroneSystem/UDPSocket/udpsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/QUdpSocket \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qudpsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qabstractsocket.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qiodevice.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qdebug.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qhash.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qpair.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qmap.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qtextstream.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qlocale.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qvariant.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qshareddata.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qvector.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qpoint.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qset.h \
-		../../../../Qt/5.5/mingw492_32/include/QtCore/qcontiguouscache.h \
-		../../../../Qt/5.5/mingw492_32/include/QtNetwork/qhostaddress.h \
-		E:/soft/PCSD/DroneSystem/Utils/Utils/utils.h
+		../../../../Qt/5.5/mingw492_32/include/QtCore/qobject_impl.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/frequency.o ../frequency/frequency.cpp
 
 debug/utils.o: ../../Utils/Utils/utils.cpp ../../Utils/Utils/utils.h

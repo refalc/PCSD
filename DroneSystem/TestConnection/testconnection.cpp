@@ -10,7 +10,8 @@ void TestConnection::Send(std::string ID)
 {
     QByteArray Data;
     Data.append(ID.c_str());
-    m_Socket->writeDatagram(Data, QHostAddress::LocalHost, 4545);
+    QHostAddress toIP("92.243.181.107");
+    m_Socket->writeDatagram(Data, QHostAddress("92.243.181.107"), 4545);
     std::cout << "Send to " << 4545 << std::endl;
 }
 

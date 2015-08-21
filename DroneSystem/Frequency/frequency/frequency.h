@@ -4,7 +4,8 @@
 #include <string>
 #include <set>
 #include <QObject>
-#include "E:\soft\PCSD\DroneSystem\UDPSocket\udpsocket.h"
+#include <QUdpSocket>
+#include "../../Utils/Utils/utils.h"
 
 class SysFrequency : public QObject
 {
