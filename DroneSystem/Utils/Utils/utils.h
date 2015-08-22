@@ -8,7 +8,7 @@
 
 //typedef there
 
-typedef std::vector<std::pair<int, int> > Iteration;
+typedef std::vector<std::pair<int, std::string> > Iteration;
 //structurs there
 struct Address
 {

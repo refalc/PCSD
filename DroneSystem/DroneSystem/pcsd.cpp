@@ -2,10 +2,11 @@
 #include <iostream>
 #include <algorithm>
 
-DroneSystem::DroneSystem(int ID, int SUPort, Address &Syn, QObject *parent) : QObject(parent), m_ID(ID), m_SynF(Syn)
+DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject *parent) : QObject(parent), m_ID(ID), m_SynF(Syn)
 {
     m_isCoordinator = false;
     m_Alone = true;
+    m_OkTask = true;
 
     m_SynUdpPort = SUPort;
     m_SynUdpSocket = new QUdpSocket(this);
@@ -17,7 +18,79 @@ DroneSystem::DroneSystem(int ID, int SUPort, Address &Syn, QObject *parent) : QO
     m_CrossDroneUdpSocket->bind(QHostAddress::Any, m_CrossDroneUdpPort);
     connect(m_CrossDroneUdpSocket, SIGNAL(readyRead()), this, SLOT(ReadFromLastDrone()));
 
+    m_TcpPort = TCPPort;
+    m_TcpSocket = new QTcpSocket(this);
+    connect(m_TcpSocket, SIGNAL(connected()),this, SLOT(ConnectedTcp()));
+    connect(m_TcpSocket, SIGNAL(disconnected()),this, SLOT(DisconnectedTcp()));
+    connect(m_TcpSocket, SIGNAL(readyRead()),this, SLOT(ReadTcp()));
+
+    std::cout << "connecting to TCP...\n";
+
+    m_TcpSocket->connectToHost("127.0.0.1", m_TcpPort);
+
+    if(!m_TcpSocket->waitForConnected(5000))
+    {
+        std::cout << "Error: " << m_TcpSocket->errorString().toStdString() << std::endl;
+    }
+
     std::cout << m_SynF.IP << " " << m_SynF.PORT << std::endl;
+}
+
+void DroneSystem::ConnectedTcp()
+{
+    std::cout << "Connected\n";
+    SendTcp("G_CRD|");
+}
+
+void DroneSystem::DisconnectedTcp()
+{
+    std::cout << "Disonnected\n";
+}
+
+void DroneSystem::ReadTcp()
+{
+    //todo commands
+    DecodeCommand(m_TcpSocket->readAll().toStdString());
+    m_OkTask = true;
+}
+
+void DroneSystem::DecodeCommand(std::string command)
+{
+    if(command.find("CRD_") != command.npos)
+    {
+        int pos = command.find("_");
+        pos++;
+        std::string strCrd;
+        int state = 0;
+        while(command[pos] != '|')
+        {
+            if(command[pos] == ':')
+            {
+                m_Crd[state] = atof(strCrd.c_str());
+                strCrd.clear();
+                state++;
+            }
+            else
+            {
+                strCrd.push_back(command[pos]);
+            }
+            pos++;
+        }
+        m_Crd[state] = atof(strCrd.c_str());
+    }
+    else if(command.find("OK") != command.npos)
+    {
+        m_OkTask = true;
+    }
+    else
+    {
+        std::cout << "Recive wrong command: " << command << std::endl;
+    }
+}
+
+void DroneSystem::SendTcp(std::string command)
+{
+    m_TcpSocket->write(command.c_str());
 }
 
 void DroneSystem::ReadFromSynUDP()
@@ -162,8 +235,7 @@ void DroneSystem::DecodeTask(std::string inputData)
         {
             if(*it == ' ' || *it == '|')
             {
-                Task = atoi(strTask.c_str());
-                m_Tasks.push_back(Task);
+                m_Tasks.push_back(strTask);
                 break;
             }
             else
@@ -208,6 +280,9 @@ bool DroneSystem::IsEqualState(std::map<int, Address> &state)
 void DroneSystem::Work()
 {
     bool TestTask = true;
+    DecodeCommand("CRD_0.1:0:2|");
+    std::cout << "My Crd: X = " << m_Crd[0] << " Y = " << m_Crd[1] << " Z = " << m_Crd[2] << std::endl;
+
     while(1)
     {
         delay(1000);
@@ -217,16 +292,26 @@ void DroneSystem::Work()
             Iteration task_iter;
             for(int i = 0; i < m_DroneIDs.size(); i++)
             {
-                std::pair<int, int> temp(m_DroneIDs[i], m_ID);
+                std::pair<int, std::string> temp(m_DroneIDs[i], "M_1:1:1|");
                 task_iter.push_back(temp);
             }
             m_AllCTasks.push_back(task_iter);
             //
-
             DoTaskIteration();
             TestTask  = false;
         }
         DoSync();
+        DoTask();
+    }
+}
+
+void DroneSystem::DoTask()
+{
+    if(m_OkTask && m_Tasks.size() != 0)
+    {
+        SendTcp(m_Tasks[0]);
+        m_Tasks.pop_front();
+        m_OkTask = false;
     }
 }
 
@@ -243,8 +328,8 @@ void DroneSystem::DoTaskIteration()
         itoa(currIter[i].first, buffer, 10);
         strData.append(buffer);
         strData.push_back(' ');
-        itoa(currIter[i].second, buffer, 10);
-        strData.append(buffer);
+        //itoa(currIter[i].second, buffer, 10);
+        strData.append(currIter[i].second);
         strData.push_back(' ');
     }
     strData[strData.size()-1] = '|';
