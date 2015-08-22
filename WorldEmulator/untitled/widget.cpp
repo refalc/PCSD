@@ -1,7 +1,7 @@
 #include "widget.h"
 #include <QtGui>
 #include <math.h>
-#include <GL/glu.h>
+
 #include <stdio.h>
 
 

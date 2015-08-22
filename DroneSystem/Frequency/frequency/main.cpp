@@ -4,8 +4,13 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    int a111;
+    std::cin >> a111;
+    std::cout << "DDFF"<<std::endl;
+    //QCoreApplication a(argc, argv);
     SysFrequency SF(4545);
     SF.Start();
-    return a.exec();
+    std::cout << "DDFF";
+    //return a.exec();
+    return 0;
 }

@@ -6,12 +6,13 @@
 
 QT  += core
 QT  += gui
-QT  += opengl
+QT += opengl
 QT += network
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = untitled
+TARGET = Untitled
 TEMPLATE = app
 
 
@@ -19,4 +20,3 @@ SOURCES += main.cpp\
         widget.cpp
 
 HEADERS  += widget.h
-LIBS += -L/usr/local/lib -lGLU
