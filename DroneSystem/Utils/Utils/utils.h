@@ -2,8 +2,13 @@
 #define UTILS_H
 
 #include <map>
+#include <vector>
+#include <utility>
 #include <string>
 
+//typedef there
+
+typedef std::vector<std::pair<int, int> > Iteration;
 //structurs there
 struct Address
 {

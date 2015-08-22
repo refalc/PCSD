@@ -9,8 +9,9 @@ int main(int argc, char *argv[])
     {
         int i = atoi(argv[1]);
         int p = atoi(argv[2]);
-        NetAddress adr;
-        adr.IP = QHostAddress::LocalHost;
+        Address adr;
+        adr.ID = -1;
+        adr.IP = "127.0.0.1";
         adr.PORT = 4545;
         DroneSystem DS(i, p, adr);
         DS.Work();

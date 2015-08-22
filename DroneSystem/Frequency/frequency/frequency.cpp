@@ -30,17 +30,40 @@ void SynFrequency::Read()
         quint16 senderPort;
 
         m_Socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+
         Address data;
-        data.ID = buffer.toInt();
+
+        //Decode input data
+        QString strID, strPORT;
+        bool state = false;
+
+        for(auto it = buffer.begin(); it != buffer.end(); it++)
+        {
+            if(!state)
+            {
+                if(*it == ' ')
+                    state = true;
+                else
+                    strID.append(*it);
+            }
+            else
+            {
+                strPORT.append(*it);
+            }
+        }
+        //
+
+        data.ID = strID.toInt();
         data.IP = sender.toString().toStdString().substr(7);
-        data.PORT = senderPort;
+        data.PORT = strPORT.toInt();
 
         if(m_Space.find(data.ID) == m_Space.end())
         {
-
-            std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
             m_Space[data.ID] = data;
+            data.PORT = senderPort;
+            std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
         }
+        data.PORT = senderPort;
         Send(data);
     }
 }
