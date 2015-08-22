@@ -1,37 +1,55 @@
 #include <vector>
 #include <map>
 #include <QUdpSocket>
+#include <QTcpSocket>
+#include "../Utils/Utils/utils.h"
+#include <deque>
 
-typedef int address;
-typedef int scene;
-typedef int task;
-
-
-class DroneSystem
+struct NetAddress
 {
+    QHostAddress IP;
+    int PORT;
+};
+
+class DroneSystem : QObject
+{
+    Q_OBJECT
 public:
 
-    DroneSystem(address init_space, address syn_space, address coord_space, int ID);
-	int InitSys();
-    void PrintIDs();
+    DroneSystem(int ID, int SUPort, NetAddress Syn, QObject *parent = 0);
+    void DoSync();
+    void Work();
+
+private:
+    bool IsEqualState(std::map<int, Address> &state);
+    void SendIDToSync();
+
+signals:
+
+public slots:
+    void ReadFromSynUDP();
+
 private:
 	//address data
-	address m_InitSpace;
-	address m_SynSpace;
-	address m_CoordSpace;
+    NetAddress m_SynF;
+    NetAddress m_NextDrone;
+    NetAddress m_LastDrone;
 
-    QUdpSocket *udpSocket;
-    int port;
+    QUdpSocket *m_SynUdpSocket;
+    int m_SynUdpPort;
+    QUdpSocket *m_UdpSocket;
+    int m_UdpPort;
+    QTcpSocket *m_TcpSocket;
+    int m_TspPort;
 	
 	//drone system data
 	int m_ID;
-	int m_CoordID;
-	address m_CoordAddress;
-	int m_NextID;
-	address m_NextAddress;
-	std::vector<int> m_DSIDs;
-	std::map<int, address> m_DSIDToAddress;
+    double m_Coord[3];
+    bool m_isCoordinator;
 	
 	//work data
-	scene m_CurrScene;
+    std::deque<int> m_Tasks;
+    QString m_CurrScene;
+    std::vector<int> m_DroneIDs;
+    std::map<int, Address> m_DronesSpace;
 };

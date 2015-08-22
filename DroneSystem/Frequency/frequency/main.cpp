@@ -5,7 +5,8 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    SysFrequency SF(4545);
+    SynFrequency SF(4545);
     SF.Start();
+    //SF.DoConnect();
     return a.exec();
 }

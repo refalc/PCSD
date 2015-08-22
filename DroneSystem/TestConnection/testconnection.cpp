@@ -10,8 +10,7 @@ void TestConnection::Send(std::string ID)
 {
     QByteArray Data;
     Data.append(ID.c_str());
-    QHostAddress toIP("92.243.181.107");
-    m_Socket->writeDatagram(Data, QHostAddress("92.243.181.107"), 4545);
+    m_Socket->writeDatagram(Data,QHostAddress("127.0.0.1"), 4545);
     std::cout << "Send to " << 4545 << std::endl;
 }
 
@@ -31,7 +30,50 @@ void TestConnection::Read()
         m_Space = StrToData(tempStr);
     }
 }
-TestConnection::~TestConnection()
+
+//tcp test
+
+void TestConnection::DoConnect()
 {
-    m_Socket->close();
+    m_TcpSocket = new QTcpSocket(this);
+
+    connect(m_TcpSocket, SIGNAL(connected()),this, SLOT(Connected()));
+    connect(m_TcpSocket, SIGNAL(disconnected()),this, SLOT(Disconnected()));
+    connect(m_TcpSocket, SIGNAL(bytesWritten(qint64)),this, SLOT(Write(qint64)));
+    connect(m_TcpSocket, SIGNAL(readyRead()),this, SLOT(ReadTcp()));
+
+    std::cout << "connecting to TCP...\n";
+
+    m_TcpSocket->connectToHost("5.228.116.51", 8888);
+
+    if(!m_TcpSocket->waitForConnected(5000))
+    {
+        std::cout << "Error: " << m_TcpSocket->errorString().toStdString() << std::endl;
+    }
+
+}
+
+void TestConnection::Connected()
+{
+    std::cout << "Connected\n";
+    while(1)
+    {
+        delay(100);
+        m_TcpSocket->write("HEAD / HTTP/1.0\n");
+    }
+}
+
+void TestConnection::Disconnected()
+{
+    std::cout << "Disonnected\n";
+}
+
+void TestConnection::ReadTcp()
+{
+    std::cout << "Read: " << m_TcpSocket->readAll().toStdString() << std::endl;
+}
+
+void TestConnection::Write(qint64 bytes)
+{
+    std::cout << "Write " << bytes << " byte.\n";
 }

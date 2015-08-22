@@ -1,15 +1,15 @@
 #include "utils.h"
 #include <cstdlib>
+#include <QTime>
+#include <QCoreApplication>
+#include <iostream>
 
-std::string Func(int i)
+void delay(int m)
 {
-    char buff[6];
-    std::string res;
-    itoa(i, buff, 10);
-    res.append(buff);
-    return res;
+    QTime dieTime= QTime::currentTime().addMSecs(m);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
-
 std::string DataToStr(std::map<int, Address> &data)
 {
     char buff[6];
@@ -40,8 +40,8 @@ std::map<int, Address> StrToData(std::string &str)
         {
             if(state_counter == 0)
             {
-                strID.clear();
                 tempData.ID = atoi(strID.c_str());
+                strID.clear();
             }
             else if(state_counter == 1)
             {
