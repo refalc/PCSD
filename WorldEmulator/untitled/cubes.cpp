@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <string>
 
 cube::cube(int port, GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
 {
@@ -59,6 +60,8 @@ cube::cube(int port, GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *par
         ColorArray[i][1] = (i%8)/9.0f;
         ColorArray[i][2] = (i%8)/9.0f;
     }
+
+    DoConnect();
 }
 
 cube::~cube()
@@ -152,7 +155,9 @@ void cube::ReadCmd()
     char buffer[1024] = {0};
     m_Client->read(buffer, m_Client->bytesAvailable());
 
-    //m_Client->write(buffer);
+    std::string answer("My Z crd = ");
+    answer.append(std::to_string(center_z));
+    m_Client->write(answer.c_str());
 
     //Decode cmd there
 
