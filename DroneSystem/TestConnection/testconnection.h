@@ -14,6 +14,7 @@ public:
     explicit TestConnection(int port, QObject *parent = 0);
     void Send(std::string ID);
     void SendTcp(std::string data);
+    void SpamMove();
 
     //tcp test
     void DoConnect();

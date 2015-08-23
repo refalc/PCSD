@@ -11,8 +11,9 @@ int main(int argc, char *argv[])
     std::cout << "start\n";
     TestConnection s(4544);
     //s.Send("CMD_M_1:1:4|");
-    s.DoConnect();
-    s.SendTcp("PISHI CHTO HOCHESH\n");
+    s.SpamMove();
+   // s.DoConnect();
+    //s.SendTcp("PISHI CHTO HOCHESH\n");
 
     return a.exec();
 }

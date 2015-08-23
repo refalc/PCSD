@@ -53,6 +53,15 @@ void TestConnection::DoConnect()
 
 }
 
+void TestConnection::SpamMove()
+{
+    while(1)
+    {
+        delay(10000);
+        Send("CMD_M_1:1:4|");
+    }
+}
+
 void TestConnection::SendTcp(std::string data)
 {
     if(m_Connect)

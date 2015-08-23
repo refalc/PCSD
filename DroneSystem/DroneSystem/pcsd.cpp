@@ -1,6 +1,8 @@
 #include <pcsd.h>
 #include <iostream>
 #include <algorithm>
+#include <random>
+#include <chrono>
 
 DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject *parent) : QObject(parent), m_ID(ID), m_SynF(Syn)
 {
@@ -195,9 +197,29 @@ void DroneSystem::MagicFunction(std::string command)
     //need algorithm
     std::cout << "Magic Function get command: " << command << std::endl;
     Iteration tempIteration;
+
+    std::random_device rd;
+    std::mt19937 mt(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::uniform_real_distribution<double> dist(-20, 20);
+
+    std::string r_command;
+    double x, y, z;
     for(auto it = m_DroneIDs.begin(); it != m_DroneIDs.end(); it++)
     {
-        tempIteration.push_back(std::pair<int, std::string>(*it, command));
+        x = dist(mt);
+        y = dist(mt);
+        z = dist(mt);
+
+        r_command.append("M_");
+        r_command.append(std::to_string(x));
+        r_command.append(":");
+        r_command.append(std::to_string(y));
+        r_command.append(":");
+        r_command.append(std::to_string(z));
+        r_command.append("|");
+
+        tempIteration.push_back(std::pair<int, std::string>(*it, r_command));
+        r_command.clear();
     }
     m_AllCTasks.push_back(tempIteration);
 }
@@ -252,6 +274,7 @@ void DroneSystem::DecodeTask(std::string inputData)
         {
             if(*it == ' ' || *it == '|')
             {
+                strTask.append("|");
                 m_Tasks.push_back(strTask);
                 break;
             }
