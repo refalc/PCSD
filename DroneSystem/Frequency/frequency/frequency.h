@@ -17,6 +17,7 @@ public:
     void Start();
     void Close();
     void Send(Address dst);
+    void Send(std::string data);
 
     //tcp test
     void DoConnect();
@@ -32,7 +33,7 @@ public slots:
     void ReadTcp();
     void Write(qint64 bytes);
 
-private:
+protected:
     QTcpServer m_Server;
     QTcpSocket *m_Client;
     QUdpSocket *m_Socket;

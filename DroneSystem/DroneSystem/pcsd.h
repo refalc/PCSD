@@ -20,7 +20,7 @@ private:
     void SendNext(QByteArray &data);
     void DecodeTask(std::string inputData);
     void DoTaskIteration();
-    void SendTcp(std::string command);
+    void SendCube(std::string command);
     void DoTask();
     void DecodeCommand(std::string command);
 
@@ -30,9 +30,9 @@ public slots:
     void ReadFromSynUDP();
     void ReadFromLastDrone();
 
-    void ConnectedTcp();
-    void DisconnectedTcp();
-    void ReadTcp();
+    void ConnectedCube();
+    void DisconnectedCube();
+    void ReadCube();
 
 private:
 	//address data
@@ -56,10 +56,10 @@ private:
 	
     //coordinator data
     std::vector<Iteration> m_AllCTasks;
+    QString m_CurrScene;
 
 	//work data
     std::deque<std::string> m_Tasks;
-    QString m_CurrScene;
     std::vector<int> m_DroneIDs;
     std::map<int, Address> m_DronesSpace;
 };

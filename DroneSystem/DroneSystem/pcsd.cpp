@@ -36,18 +36,18 @@ DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject 
     std::cout << m_SynF.IP << " " << m_SynF.PORT << std::endl;
 }
 
-void DroneSystem::ConnectedTcp()
+void DroneSystem::ConnectedCube()
 {
     std::cout << "Connected\n";
-    SendTcp("G_CRD|");
+    SendCube("G_CRD|");
 }
 
-void DroneSystem::DisconnectedTcp()
+void DroneSystem::DisconnectedCube()
 {
     std::cout << "Disonnected\n";
 }
 
-void DroneSystem::ReadTcp()
+void DroneSystem::ReadCube()
 {
     //todo commands
     DecodeCommand(m_TcpSocket->readAll().toStdString());
@@ -88,7 +88,7 @@ void DroneSystem::DecodeCommand(std::string command)
     }
 }
 
-void DroneSystem::SendTcp(std::string command)
+void DroneSystem::SendCube(std::string command)
 {
     m_TcpSocket->write(command.c_str());
 }
@@ -215,7 +215,7 @@ void DroneSystem::ReadFromLastDrone()
 void DroneSystem::DecodeTask(std::string inputData)
 {
     std::string strID, strTask;
-    int Task, ID;
+    int ID;
     int state = 0;
     std::cout << "I Decode: " <<  inputData << "\n";
     for(auto it = inputData.begin(), it_end = inputData.end(); it != it_end; it++)
@@ -309,7 +309,7 @@ void DroneSystem::DoTask()
 {
     if(m_OkTask && m_Tasks.size() != 0)
     {
-        SendTcp(m_Tasks[0]);
+        SendCube(m_Tasks[0]);
         m_Tasks.pop_front();
         m_OkTask = false;
     }
@@ -328,7 +328,6 @@ void DroneSystem::DoTaskIteration()
         itoa(currIter[i].first, buffer, 10);
         strData.append(buffer);
         strData.push_back(' ');
-        //itoa(currIter[i].second, buffer, 10);
         strData.append(currIter[i].second);
         strData.push_back(' ');
     }

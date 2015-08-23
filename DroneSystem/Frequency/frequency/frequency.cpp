@@ -1,5 +1,6 @@
 #include "frequency.h"
 #include <iostream>
+#include <algorithm>
 
 SynFrequency::SynFrequency(int port, QObject *parent) : m_Port(port), QObject(parent)
 {
@@ -34,37 +35,46 @@ void SynFrequency::Read()
         Address data;
 
         //Decode input data
-        QString strID, strPORT;
-        bool state = false;
-
-        for(auto it = buffer.begin(); it != buffer.end(); it++)
+        if(buffer.toStdString().find("M_") == std::string::npos)
         {
-            if(!state)
+            std::cout << "Recive DATA from Drone\n";
+            QString strID, strPORT;
+            bool state = false;
+
+            for(auto it = buffer.begin(); it != buffer.end(); it++)
             {
-                if(*it == ' ')
-                    state = true;
+                if(!state)
+                {
+                    if(*it == ' ')
+                        state = true;
+                    else
+                        strID.append(*it);
+                }
                 else
-                    strID.append(*it);
+                {
+                    strPORT.append(*it);
+                }
             }
-            else
+            //
+
+            data.ID = strID.toInt();
+            data.IP = sender.toString().toStdString().substr(7);
+            data.PORT = strPORT.toInt();
+
+            if(m_Space.find(data.ID) == m_Space.end())
             {
-                strPORT.append(*it);
+                m_Space[data.ID] = data;
+                data.PORT = senderPort;
+                std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
             }
-        }
-        //
-
-        data.ID = strID.toInt();
-        data.IP = sender.toString().toStdString().substr(7);
-        data.PORT = strPORT.toInt();
-
-        if(m_Space.find(data.ID) == m_Space.end())
-        {
-            m_Space[data.ID] = data;
             data.PORT = senderPort;
-            std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
+            Send(data);
         }
-        data.PORT = senderPort;
-        Send(data);
+        else
+        {
+            //Recive COMMAND
+            std::cout << "Recive COMMAND\n";
+        }
     }
 }
 

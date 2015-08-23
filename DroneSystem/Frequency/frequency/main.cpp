@@ -8,5 +8,6 @@ int main(int argc, char *argv[])
     SynFrequency SF(4545);
     SF.Start();
     //SF.DoConnect();
+
     return a.exec();
 }
