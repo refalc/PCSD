@@ -20,15 +20,15 @@ DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject 
 
     m_TcpPort = TCPPort;
     m_TcpSocket = new QTcpSocket(this);
-    connect(m_TcpSocket, SIGNAL(connected()),this, SLOT(ConnectedTcp()));
-    connect(m_TcpSocket, SIGNAL(disconnected()),this, SLOT(DisconnectedTcp()));
-    connect(m_TcpSocket, SIGNAL(readyRead()),this, SLOT(ReadTcp()));
+    connect(m_TcpSocket, SIGNAL(connected()),this, SLOT(ConnectedCube()));
+    connect(m_TcpSocket, SIGNAL(disconnected()),this, SLOT(DisconnectedCube()));
+    connect(m_TcpSocket, SIGNAL(readyRead()),this, SLOT(ReadCube()));
 
     std::cout << "connecting to TCP...\n";
 
     m_TcpSocket->connectToHost("127.0.0.1", m_TcpPort);
 
-    if(!m_TcpSocket->waitForConnected(5000))
+    if(!m_TcpSocket->waitForConnected(2000))
     {
         std::cout << "Error: " << m_TcpSocket->errorString().toStdString() << std::endl;
     }
@@ -51,7 +51,6 @@ void DroneSystem::ReadCube()
 {
     //todo commands
     DecodeCommand(m_TcpSocket->readAll().toStdString());
-    m_OkTask = true;
 }
 
 void DroneSystem::DecodeCommand(std::string command)
@@ -104,6 +103,12 @@ void DroneSystem::ReadFromSynUDP()
         QHostAddress sender;
         quint16 senderPort;
         m_SynUdpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+
+        if(buffer.toStdString().find("M_") != std::string::npos)
+        {
+            MagicFunction(buffer.toStdString());
+            continue;
+        }
 
         std::string tempStr = buffer.toStdString();
         std::map<int, Address> tempSpace = StrToData(tempStr);
@@ -183,6 +188,18 @@ void DroneSystem::ReadFromSynUDP()
             std::cout << "State changed...\nNow we have " << m_DronesSpace.size() << "\n" << tempStr << std::endl;
         }
     }
+}
+
+void DroneSystem::MagicFunction(std::string command)
+{
+    //need algorithm
+    std::cout << "Magic Function get command: " << command << std::endl;
+    Iteration tempIteration;
+    for(auto it = m_DroneIDs.begin(); it != m_DroneIDs.end(); it++)
+    {
+        tempIteration.push_back(std::pair<int, std::string>(*it, command));
+    }
+    m_AllCTasks.push_back(tempIteration);
 }
 
 void DroneSystem::ReadFromLastDrone()
@@ -279,26 +296,17 @@ bool DroneSystem::IsEqualState(std::map<int, Address> &state)
 
 void DroneSystem::Work()
 {
-    bool TestTask = true;
     DecodeCommand("CRD_0.1:0:2|");
     std::cout << "My Crd: X = " << m_Crd[0] << " Y = " << m_Crd[1] << " Z = " << m_Crd[2] << std::endl;
 
     while(1)
     {
         delay(1000);
-        if(m_isCoordinator && TestTask)
+        if(m_isCoordinator)
         {
+            if(m_AllCTasks.size() != 0)
+                DoTaskIteration();
             //generate test task iteration
-            Iteration task_iter;
-            for(int i = 0; i < m_DroneIDs.size(); i++)
-            {
-                std::pair<int, std::string> temp(m_DroneIDs[i], "M_1:1:1|");
-                task_iter.push_back(temp);
-            }
-            m_AllCTasks.push_back(task_iter);
-            //
-            DoTaskIteration();
-            TestTask  = false;
         }
         DoSync();
         DoTask();
@@ -317,7 +325,9 @@ void DroneSystem::DoTask()
 
 void DroneSystem::DoTaskIteration()
 {
+    std::cout << "Coordinator say WORK\n";
     Iteration currIter = m_AllCTasks[0];
+    m_AllCTasks.pop_front();
 
     std::string strData;
     char buffer[10];
@@ -339,7 +349,6 @@ void DroneSystem::DoTaskIteration()
 void DroneSystem::DoSync()
 {
    SendIDToSync();
-
 }
 
 void DroneSystem::SendIDToSync()

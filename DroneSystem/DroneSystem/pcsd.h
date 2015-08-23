@@ -24,6 +24,8 @@ private:
     void DoTask();
     void DecodeCommand(std::string command);
 
+    void MagicFunction(std::string data);
+
 signals:
 
 public slots:
@@ -55,7 +57,7 @@ private:
     bool m_OkTask;
 	
     //coordinator data
-    std::vector<Iteration> m_AllCTasks;
+    std::deque<Iteration> m_AllCTasks;
     QString m_CurrScene;
 
 	//work data

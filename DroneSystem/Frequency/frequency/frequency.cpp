@@ -35,9 +35,9 @@ void SynFrequency::Read()
         Address data;
 
         //Decode input data
-        if(buffer.toStdString().find("M_") == std::string::npos)
+        if(buffer.toStdString().find("CMD_") == std::string::npos)
         {
-            std::cout << "Recive DATA from Drone\n";
+            //std::cout << "Recive DATA from Drone\n";
             QString strID, strPORT;
             bool state = false;
 
@@ -74,6 +74,7 @@ void SynFrequency::Read()
         {
             //Recive COMMAND
             std::cout << "Recive COMMAND\n";
+            Send(buffer.toStdString().substr(4));
         }
     }
 }
@@ -84,6 +85,15 @@ void SynFrequency::Send(Address dst)
     Data.append(DataToStr(m_Space).c_str());
     //std::cout << "Send to " << dst.IP.c_str()  << " PORT " << dst.PORT << " " << Data.toStdString() << std::endl;
     m_Socket->writeDatagram(Data, QHostAddress(dst.IP.c_str()), dst.PORT);
+}
+
+void SynFrequency::Send(std::string data)
+{
+    QByteArray Data(data.c_str());
+    for(auto it = m_Space.begin(), it_end = m_Space.end(); it != it_end; it++)
+    {
+        m_Socket->writeDatagram(Data, QHostAddress(it->second.IP.c_str()), it->second.PORT-1);
+    }
 }
 
 //tcp test
