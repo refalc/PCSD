@@ -13,6 +13,7 @@ class TestConnection : public QObject
 public:
     explicit TestConnection(int port, QObject *parent = 0);
     void Send(std::string ID);
+    void SendTcp(std::string data);
 
     //tcp test
     void DoConnect();
@@ -32,6 +33,7 @@ private:
     QTcpSocket *m_TcpSocket;
     std::map<int, Address> m_Space;
     int m_Port;
+    bool m_Connect;
 };
 
 #endif // TESTCONNECTION_H

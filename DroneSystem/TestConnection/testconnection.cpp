@@ -53,14 +53,23 @@ void TestConnection::DoConnect()
 
 }
 
+void TestConnection::SendTcp(std::string data)
+{
+    if(m_Connect)
+    {
+        m_TcpSocket->write(data.c_str());
+    }
+}
+
 void TestConnection::Connected()
 {
     std::cout << "Connected\n";
-    while(1)
+    m_Connect = true;
+   /* while(1)
     {
         delay(100);
         m_TcpSocket->write("HEAD / HTTP/1.0\n");
-    }
+    }*/
 }
 
 void TestConnection::Disconnected()

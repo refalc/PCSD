@@ -10,8 +10,9 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     std::cout << "start\n";
     TestConnection s(4544);
-    s.Send("CMD_M_1:1:4|");
-    //s.DoConnect();
+    //s.Send("CMD_M_1:1:4|");
+    s.DoConnect();
+    s.SendTcp("PISHI CHTO HOCHESH\n");
 
     return a.exec();
 }
