@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include <stdio.h>
-
+#include <iostream>
 
 cube::cube(int port, GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
 {
@@ -132,3 +132,30 @@ void cube::DoConnect()
 
 }
 
+void cube::Connected()
+{
+    std::cout << "Connected\n";
+    m_Client = m_Server.nextPendingConnection(); //m_Client on connection
+    connect(m_Client, SIGNAL(readyRead()), this, SLOT(ReadCmd()));  //If recive data call ReadCmd()
+    m_Client->write("Hello Client\n");
+}
+
+void cube::Disconnected()
+{
+    //if disconnected
+    std::cout << "Disonnected\n";
+}
+
+void cube::ReadCmd()
+{
+    //When recive data
+    char buffer[1024] = {0};
+    m_Client->read(buffer, m_Client->bytesAvailable());
+
+    //m_Client->write(buffer);
+
+    //Decode cmd there
+
+    //Do Task there
+
+}

@@ -52,18 +52,15 @@ public:
 signals:
 
 public slots:
-    void Read();
 
     //tcp test
     void Connected();
     void Disconnected();
-    void ReadTcp();
-    void Write(qint64 bytes);
+    void ReadCmd();
 
 private:
     QTcpServer m_Server;
     QTcpSocket *m_Client;
-    QUdpSocket *m_Socket;
     int m_Port;
 
 };
