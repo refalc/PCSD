@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QTcpSocket>
 #include <iostream>
 #include "E:\soft\PCSD\DroneSystem\Utils\Utils\utils.h"
 
@@ -12,14 +13,23 @@ class TestConnection : public QObject
 public:
     explicit TestConnection(int port, QObject *parent = 0);
     void Send(std::string ID);
-    ~TestConnection();
+
+    //tcp test
+    void DoConnect();
 signals:
 
 public slots:
     void Read();
 
+    //tcp test
+    void Connected();
+    void Disconnected();
+    void ReadTcp();
+    void Write(qint64 bytes);
+
 private:
     QUdpSocket *m_Socket;
+    QTcpSocket *m_TcpSocket;
     std::map<int, Address> m_Space;
     int m_Port;
 };

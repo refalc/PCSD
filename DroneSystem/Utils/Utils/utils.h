@@ -2,8 +2,13 @@
 #define UTILS_H
 
 #include <map>
+#include <vector>
+#include <utility>
 #include <string>
 
+//typedef there
+
+typedef std::vector<std::pair<int, std::string> > Iteration;
 //structurs there
 struct Address
 {
@@ -16,6 +21,7 @@ struct Address
 //functions there
 std::string DataToStr(std::map<int, Address> & data);
 std::map<int, Address> StrToData(std::string &str);
+void delay(int m);
 //
 
 #endif // UTILS_H

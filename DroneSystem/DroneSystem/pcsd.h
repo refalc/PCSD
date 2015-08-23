@@ -1,37 +1,65 @@
 #include <vector>
 #include <map>
 #include <QUdpSocket>
+#include <QTcpSocket>
+#include "../Utils/Utils/utils.h"
+#include <deque>
 
-typedef int address;
-typedef int scene;
-typedef int task;
-
-
-class DroneSystem
+class DroneSystem : QObject
 {
+    Q_OBJECT
 public:
 
-    DroneSystem(address init_space, address syn_space, address coord_space, int ID);
-	int InitSys();
-    void PrintIDs();
+    DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject *parent = 0);
+    void DoSync();
+    void Work();
+
+private:
+    bool IsEqualState(std::map<int, Address> &state);
+    void SendIDToSync();
+    void SendNext(QByteArray &data);
+    void DecodeTask(std::string inputData);
+    void DoTaskIteration();
+    void SendCube(std::string command);
+    void DoTask();
+    void DecodeCommand(std::string command);
+
+signals:
+
+public slots:
+    void ReadFromSynUDP();
+    void ReadFromLastDrone();
+
+    void ConnectedCube();
+    void DisconnectedCube();
+    void ReadCube();
+
 private:
 	//address data
-	address m_InitSpace;
-	address m_SynSpace;
-	address m_CoordSpace;
+    Address m_SynF;
+    Address m_NextDrone;
+    Address m_LastDrone;
 
-    QUdpSocket *udpSocket;
-    int port;
+    QUdpSocket *m_SynUdpSocket;
+    int m_SynUdpPort;
+    QUdpSocket *m_CrossDroneUdpSocket;
+    int m_CrossDroneUdpPort;
+    QTcpSocket *m_TcpSocket;
+    int m_TcpPort;
 	
 	//drone system data
 	int m_ID;
-	int m_CoordID;
-	address m_CoordAddress;
-	int m_NextID;
-	address m_NextAddress;
-	std::vector<int> m_DSIDs;
-	std::map<int, address> m_DSIDToAddress;
+    double m_Crd[3];
+    bool m_isCoordinator;
+    bool m_Alone;
+    bool m_OkTask;
 	
+    //coordinator data
+    std::vector<Iteration> m_AllCTasks;
+    QString m_CurrScene;
+
 	//work data
-	scene m_CurrScene;
+    std::deque<std::string> m_Tasks;
+    std::vector<int> m_DroneIDs;
+    std::map<int, Address> m_DronesSpace;
 };

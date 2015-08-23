@@ -1,23 +1,25 @@
 #include "frequency.h"
 #include <iostream>
+#include <algorithm>
 
-SysFrequency::SysFrequency(int port, QObject *parent) : m_Port(port), QObject(parent)
+SynFrequency::SynFrequency(int port, QObject *parent) : m_Port(port), QObject(parent)
 {
 }
-void SysFrequency::Start()
+void SynFrequency::Start()
 {
     m_Socket = new QUdpSocket(this);
     m_Socket->bind(QHostAddress::Any, m_Port);
     connect(m_Socket, SIGNAL(readyRead()), this, SLOT(Read()));
+    std::cout <<"Start\n";
 }
 
-void SysFrequency::Close()
+void SynFrequency::Close()
 {
     m_Space.clear();
     m_Socket->close();
 }
 
-void SysFrequency::Read()
+void SynFrequency::Read()
 {
     while(m_Socket->hasPendingDatagrams())
     {
@@ -29,19 +31,95 @@ void SysFrequency::Read()
         quint16 senderPort;
 
         m_Socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+
         Address data;
-        data.ID = buffer.toInt();
-        data.IP = sender.toString().toStdString();
-        data.PORT = senderPort;
-        std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
-        m_Space[data.ID] = data;
-        Send(data);
+
+        //Decode input data
+        if(buffer.toStdString().find("M_") == std::string::npos)
+        {
+            std::cout << "Recive DATA from Drone\n";
+            QString strID, strPORT;
+            bool state = false;
+
+            for(auto it = buffer.begin(); it != buffer.end(); it++)
+            {
+                if(!state)
+                {
+                    if(*it == ' ')
+                        state = true;
+                    else
+                        strID.append(*it);
+                }
+                else
+                {
+                    strPORT.append(*it);
+                }
+            }
+            //
+
+            data.ID = strID.toInt();
+            data.IP = sender.toString().toStdString().substr(7);
+            data.PORT = strPORT.toInt();
+
+            if(m_Space.find(data.ID) == m_Space.end())
+            {
+                m_Space[data.ID] = data;
+                data.PORT = senderPort;
+                std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
+            }
+            data.PORT = senderPort;
+            Send(data);
+        }
+        else
+        {
+            //Recive COMMAND
+            std::cout << "Recive COMMAND\n";
+        }
     }
 }
 
-void SysFrequency::Send(Address dst)
+void SynFrequency::Send(Address dst)
 {
     QByteArray Data;
     Data.append(DataToStr(m_Space).c_str());
+    //std::cout << "Send to " << dst.IP.c_str()  << " PORT " << dst.PORT << " " << Data.toStdString() << std::endl;
     m_Socket->writeDatagram(Data, QHostAddress(dst.IP.c_str()), dst.PORT);
+}
+
+//tcp test
+
+void SynFrequency::DoConnect()
+{
+    connect(&m_Server, SIGNAL(newConnection()),
+        this, SLOT(Connected()));
+
+    m_Server.listen(QHostAddress::Any, 8888);
+
+}
+
+void SynFrequency::Connected()
+{
+    std::cout << "Connected\n";
+    m_Client = m_Server.nextPendingConnection();
+    connect(m_Client, SIGNAL(readyRead()), this, SLOT(ReadTcp()));
+    m_Client->write("Hello Client\n");
+}
+
+void SynFrequency::Disconnected()
+{
+    std::cout << "Disonnected\n";
+}
+
+void SynFrequency::ReadTcp()
+{
+    char buffer[1024] = {0};
+    m_Client->read(buffer, m_Client->bytesAvailable());
+    std::cout << buffer << endl;
+    m_Client->write(buffer);
+    //m_Client->close();
+}
+
+void SynFrequency::Write(qint64 bytes)
+{
+    std::cout << "Write " << bytes << " byte.\n";
 }
