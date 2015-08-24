@@ -10,11 +10,9 @@
 
 Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
 {
-    shift = 0.01;
-    tmp = 0;
-    commands = fopen("commands.txt", "w");
+
+    commands = fopen("errors.txt", "w");
     aTimer = new QTimer();
-    t = 0;
     timer.start(30, this);
     MOVE_SPEED = 0.1;
     COLLIDE_CHECK = true;
@@ -42,7 +40,11 @@ Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
     }
     fclose(f);
     }
-    else fprintf(commands, "fail");
+    else
+    {
+        fprintf(commands, "fail, file not found");
+        cubes = new cube[10];
+    }
     fclose(commands);
     cubes[0].size = 200;
     cubes[0].center_x = 0;
@@ -94,15 +96,7 @@ void Scene3D::paintGL()
     //glTranslatef(0.0f, zTra, 0.0f);
     //glRotatef(0, 1.0f, 0.0f, 0.0f);
     gravity_check();
-    /*move_cube_to(19, 4*sin(t), 5*cos(t), 0.5);
-    move_cube_to(20, 0, 9*cos(t), 8*sin(t));
-    move_cube(25, 0, 0.01, 0);
-
-    move_cube(28, shift, 0, 0);
-    if (abs(tmp - cubes[28].center_x) < 0.0001) shift = -shift;
-    tmp = cubes[28].center_x;
-    t += 0.01*/;
-    for (int i = 0; i < n; i++) cubes[i].do_task();
+    do_task();
     for (int i = 0; i < n; i++) drawCube(i);
 
 }
@@ -162,10 +156,13 @@ void Scene3D::keyPressEvent(QKeyEvent* pe)
         break;
     case Qt::Key_C:
         //cubes[29].add_path(-5, 5, 10);
-        cubes[3].add_path(-5, 5, 0.5);
+        cubes[3].add_path(-5, 3.9, 0.5);
         break;
     case Qt::Key_V:
-        cubes[3].add_path(5, 5, 0.5);
+        cubes[3].add_path(5, 3.9, 0.5);
+        break;
+    case Qt::Key_F:
+        cubes[4].add_path(0, 5, 0.5);
         break;
 
     default:
@@ -184,7 +181,7 @@ void Scene3D::drawCube(int id)
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubes[id].IndexArray);
 }
 
-void Scene3D::move_cube(int id, GLfloat x, GLfloat y, GLfloat z)
+bool Scene3D::move_cube(int id, GLfloat x, GLfloat y, GLfloat z)
 {
     if (COLLIDE_CHECK)
     {
@@ -198,14 +195,16 @@ void Scene3D::move_cube(int id, GLfloat x, GLfloat y, GLfloat z)
             cubes[id].center_x -= x;
             cubes[id].center_y -= y;
             cubes[id].center_z -= z;
+            return false;
         }
         //иначе пересчитываем координаты вершин
         else cubes[id].update_coord();
     }
     else cubes[id].move(x, y, z);
+    return true;
 }
 
-void Scene3D::move_cube_to(int id, GLfloat x, GLfloat y, GLfloat z)
+bool Scene3D::move_cube_to(int id, GLfloat x, GLfloat y, GLfloat z)
 {
     if (COLLIDE_CHECK)
     {
@@ -223,11 +222,13 @@ void Scene3D::move_cube_to(int id, GLfloat x, GLfloat y, GLfloat z)
             cubes[id].center_x = x_old;
             cubes[id].center_y = y_old;
             cubes[id].center_z = z_old;
+            return false;
         }
         //иначе пересчитываем координаты вершин
         else cubes[id].update_coord();
     }
     else cubes[id].move_to(x, y, z);
+    return true;
 }
 
 void Scene3D::move_up()
@@ -366,7 +367,25 @@ bool Scene3D::collide_check(int id)
     return false;
 }
 
+void Scene3D::do_task()
+{
+    GLfloat x, y, z;
+    for (int i = 0; i < n; i++)
+    {
+        if (cubes[i].task_queue.empty()) continue;
+        x = cubes[i].task_queue.front().x;
+        y = cubes[i].task_queue.front().y;
+        z = cubes[i].task_queue.front().z;
+        if (move_cube(i, x, y, z))
+        {
+            //check cubes[i].task_queue.front().com
+            cubes[i].task_queue.pop();
+            continue;
+        }
+        //else send some error message or smth
 
+    }
+}
 
 
 
