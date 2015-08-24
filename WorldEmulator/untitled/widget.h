@@ -89,7 +89,6 @@ public:
 
 
 
-    QUdpSocket *udpSocket;
     Scene3D(QWidget* parent = 0);
 
 };

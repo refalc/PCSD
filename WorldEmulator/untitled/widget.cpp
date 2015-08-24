@@ -10,13 +10,6 @@
 
 Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
 {
-    udpSocket = new QUdpSocket();
-    udpSocket->bind(45454, QUdpSocket::ShareAddress);
-    char buff[6];
-    QByteArray datagram = itoa(135, buff, 10);
-    QHostAddress Address = QHostAddress("127.0.0.1");
-    udpSocket->writeDatagram(datagram, Address, 45454);
-    datagram.clear();
     shift = 0.01;
     tmp = 0;
     commands = fopen("commands.txt", "w");
@@ -101,14 +94,15 @@ void Scene3D::paintGL()
     //glTranslatef(0.0f, zTra, 0.0f);
     //glRotatef(0, 1.0f, 0.0f, 0.0f);
     gravity_check();
-    move_cube_to(19, 4*sin(t), 5*cos(t), 0.5);
+    /*move_cube_to(19, 4*sin(t), 5*cos(t), 0.5);
     move_cube_to(20, 0, 9*cos(t), 8*sin(t));
     move_cube(25, 0, 0.01, 0);
 
     move_cube(28, shift, 0, 0);
     if (abs(tmp - cubes[28].center_x) < 0.0001) shift = -shift;
     tmp = cubes[28].center_x;
-    t += 0.01;
+    t += 0.01*/;
+    for (int i = 0; i < n; i++) cubes[i].do_task();
     for (int i = 0; i < n; i++) drawCube(i);
 
 }
@@ -166,6 +160,14 @@ void Scene3D::keyPressEvent(QKeyEvent* pe)
     case Qt::Key_X:
         move_up();
         break;
+    case Qt::Key_C:
+        //cubes[29].add_path(-5, 5, 10);
+        cubes[3].add_path(-5, 5, 0.5);
+        break;
+    case Qt::Key_V:
+        cubes[3].add_path(5, 5, 0.5);
+        break;
+
     default:
         break;
 

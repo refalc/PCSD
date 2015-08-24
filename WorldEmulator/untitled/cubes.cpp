@@ -6,8 +6,14 @@
 #include <iostream>
 #include <string>
 
-cube::cube(int port, GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
+int cube::last_id = -1;
+
+cube::cube(GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
 {
+    speed = 0.1;
+    last_id++;
+    id = last_id;
+    m_Port = 48120 + id;
     fixed = false;
     center_x = x;
     center_y = y;
@@ -131,7 +137,7 @@ void cube::DoConnect()
     connect(&m_Server, SIGNAL(newConnection()),
         this, SLOT(Connected()));
 
-    m_Server.listen(QHostAddress::Any, 8888);
+    m_Server.listen(QHostAddress::Any, m_Port);
 
 }
 
@@ -151,16 +157,148 @@ void cube::Disconnected()
 
 void cube::ReadCmd()
 {
+    GLfloat x, y, z;
     //When recive data
     char buffer[1024] = {0};
     m_Client->read(buffer, m_Client->bytesAvailable());
 
-    std::string answer("My Z crd = ");
-    answer.append(std::to_string(center_z));
-    m_Client->write(answer.c_str());
+    //std::string answer("My Z crd = ");
+    //answer.append(std::to_string(center_z));
+    //m_Client->write(answer.c_str());
 
     //Decode cmd there
 
-    //Do Task there
+    std::string cmd(buffer);
+    if(cmd.find("M_") != std::string::npos)
+    {
+        cmd = cmd.substr(2);
+        int pos = 0, size = cmd.size();
+        char symb = cmd[pos];
+        std::string tempStr;
+        while(symb != ':')
+        {
+            tempStr.push_back(symb);
+            pos++;
+            if(pos == size)
+            {
+                std::string answer("Error cmd:");
+                answer.append(buffer);
+                m_Client->write(answer.c_str());
+                return;
+            }
+            symb = cmd[pos];
+        }
+        x = atof(tempStr.c_str());
+        tempStr.clear();
 
+        pos++;
+        symb = cmd[pos];
+        while(symb != ':')
+        {
+            tempStr.push_back(symb);
+            pos++;
+            if(pos == size)
+            {
+                std::string answer("Error cmd:");
+                answer.append(buffer);
+                m_Client->write(answer.c_str());
+                return;
+            }
+            symb = cmd[pos];
+        }
+        y = atof(tempStr.c_str());
+        tempStr.clear();
+
+        pos++;
+        symb = cmd[pos];
+        while(symb != '|')
+        {
+            tempStr.push_back(symb);
+            pos++;
+            if(pos == size)
+            {
+                std::string answer("Error cmd:");
+                answer.append(buffer);
+                m_Client->write(answer.c_str());
+                return;
+            }
+            symb = cmd[pos];
+        }
+        z = atof(tempStr.c_str());
+
+        add_path(x, y, z);
+        std::string answer("Good cmd: add Path\n");
+        answer.append(std::to_string(x));
+        answer.push_back(' ');
+        answer.append(std::to_string(y));
+        answer.push_back(' ');
+        answer.append(std::to_string(z));
+        answer.push_back(' ');
+        //m_Client->write(answer.c_str());
+    }
+    else
+    {
+        std::string answer("Error cmd:");
+        answer.append(buffer);
+        m_Client->write(answer.c_str());
+    }
+    //Do Task there
+    //add_path(x, y, z);
+
+}
+
+void cube::do_task()
+{
+
+    GLfloat x, y, z;
+    if (task_queue.size() < 4) return;
+
+    std::string answer("DoTask:\nsize = ");
+    answer.append(std::to_string(task_queue.size()));
+    //m_Client->write(answer.c_str());
+
+    if (task_queue.front() > 0.5) m_Client->write("\nOK|");
+    task_queue.pop();
+    x = task_queue.front();
+    task_queue.pop();
+    y = task_queue.front();
+    task_queue.pop();
+    z = task_queue.front();
+    task_queue.pop();
+    move(x, y, z);
+}
+
+void cube::add_path(GLfloat x, GLfloat y, GLfloat z)
+{
+    std::string answer("AddPath\n");
+   // m_Client->write(answer.c_str());
+    std::string answer2("Tasksize = ");
+    answer2.append(std::to_string(task_queue.size()));
+   // m_Client->write(answer2.c_str());
+
+    if (task_queue.empty())
+    {
+        dest_x = center_x;
+        dest_y = center_y;
+        dest_z = center_z;
+    }
+    double dist = sqrt((x - dest_x)*(x - dest_x) + (y - dest_y)*(y - dest_y) + (z - dest_z)*(z - dest_z));
+    int iter = dist/speed;
+    double dir_x = (x - dest_x)/dist;
+    double dir_y = (y - dest_y)/dist;
+    double dir_z = (z - dest_z)/dist;
+    for (int i = 0; i < iter; i++)
+    {
+        task_queue.push(0);
+        task_queue.push(speed*dir_x);
+        task_queue.push(speed*dir_y);
+        task_queue.push(speed*dir_z);
+    }
+    task_queue.push(1);
+    task_queue.push(x - (iter*speed*dir_x + dest_x));
+    task_queue.push(y - (iter*speed*dir_y + dest_y));
+    task_queue.push(z - (iter*speed*dir_z + dest_z));
+    dest_x = x;
+    dest_y = y;
+    dest_z = z;
 }

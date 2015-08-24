@@ -44,7 +44,7 @@ void TestConnection::DoConnect()
 
     std::cout << "connecting to TCP...\n";
 
-    m_TcpSocket->connectToHost("127.0.0.1", 8888);
+    m_TcpSocket->connectToHost("127.0.0.1", 48122);
 
     if(!m_TcpSocket->waitForConnected(5000))
     {
