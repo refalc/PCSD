@@ -67,6 +67,7 @@ cube::cube(GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
         ColorArray[i][2] = (i%8)/9.0f;
     }
 
+    m_Connected  = false;
     DoConnect();
 }
 
@@ -146,7 +147,8 @@ void cube::Connected()
     std::cout << "Connected\n";
     m_Client = m_Server.nextPendingConnection(); //m_Client on connection
     connect(m_Client, SIGNAL(readyRead()), this, SLOT(ReadCmd()));  //If recive data call ReadCmd()
-    m_Client->write("Hello Client\n");
+    m_Connected = true;
+    SendAnswer("Hello Client\n");
 }
 
 void cube::Disconnected()
@@ -183,7 +185,7 @@ void cube::ReadCmd()
             {
                 std::string answer("Error cmd:");
                 answer.append(buffer);
-                m_Client->write(answer.c_str());
+                SendAnswer(answer);
                 return;
             }
             symb = cmd[pos];
@@ -201,7 +203,7 @@ void cube::ReadCmd()
             {
                 std::string answer("Error cmd:");
                 answer.append(buffer);
-                m_Client->write(answer.c_str());
+                SendAnswer(answer);
                 return;
             }
             symb = cmd[pos];
@@ -219,7 +221,7 @@ void cube::ReadCmd()
             {
                 std::string answer("Error cmd:");
                 answer.append(buffer);
-                m_Client->write(answer.c_str());
+                SendAnswer(answer);
                 return;
             }
             symb = cmd[pos];
@@ -234,48 +236,29 @@ void cube::ReadCmd()
         answer.push_back(' ');
         answer.append(std::to_string(z));
         answer.push_back(' ');
-        //m_Client->write(answer.c_str());
+        SendAnswer(answer);
     }
     else
     {
         std::string answer("Error cmd:");
         answer.append(buffer);
-        m_Client->write(answer.c_str());
+        SendAnswer(answer);
     }
     //Do Task there
     //add_path(x, y, z);
 
 }
 
-void cube::do_task()
+
+void cube::SendAnswer(std::string answer)
 {
-
-    GLfloat x, y, z;
-    if (task_queue.size() < 4) return;
-
-    std::string answer("DoTask:\nsize = ");
-    answer.append(std::to_string(task_queue.size()));
-    //m_Client->write(answer.c_str());
-
-    if (task_queue.front() > 0.5) m_Client->write("\nOK|");
-    task_queue.pop();
-    x = task_queue.front();
-    task_queue.pop();
-    y = task_queue.front();
-    task_queue.pop();
-    z = task_queue.front();
-    task_queue.pop();
-    move(x, y, z);
+    if(m_Connected)
+        m_Client->write(answer.c_str());
 }
 
 void cube::add_path(GLfloat x, GLfloat y, GLfloat z)
 {
-    std::string answer("AddPath\n");
-   // m_Client->write(answer.c_str());
-    std::string answer2("Tasksize = ");
-    answer2.append(std::to_string(task_queue.size()));
-   // m_Client->write(answer2.c_str());
-
+    task tsk;
     if (task_queue.empty())
     {
         dest_x = center_x;
@@ -287,17 +270,19 @@ void cube::add_path(GLfloat x, GLfloat y, GLfloat z)
     double dir_x = (x - dest_x)/dist;
     double dir_y = (y - dest_y)/dist;
     double dir_z = (z - dest_z)/dist;
+    tsk.com = 0;
+    tsk.x = speed*dir_x;
+    tsk.y = speed*dir_y;
+    tsk.z = speed*dir_z;
     for (int i = 0; i < iter; i++)
-    {
-        task_queue.push(0);
-        task_queue.push(speed*dir_x);
-        task_queue.push(speed*dir_y);
-        task_queue.push(speed*dir_z);
-    }
-    task_queue.push(1);
-    task_queue.push(x - (iter*speed*dir_x + dest_x));
-    task_queue.push(y - (iter*speed*dir_y + dest_y));
-    task_queue.push(z - (iter*speed*dir_z + dest_z));
+        task_queue.push(tsk);
+
+    tsk.com = 1;
+    tsk.x = x - (iter*speed*dir_x + dest_x);
+    tsk.y = y - (iter*speed*dir_y + dest_y);
+    tsk.z = z - (iter*speed*dir_z + dest_z);
+    task_queue.push(tsk);
+
     dest_x = x;
     dest_y = y;
     dest_z = z;

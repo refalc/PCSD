@@ -57,7 +57,7 @@ void TestConnection::SpamMove()
 {
     while(1)
     {
-        delay(10000);
+        delay(6000);
         Send("CMD_M_1:1:4|");
     }
 }

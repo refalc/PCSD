@@ -22,10 +22,7 @@ class Scene3D : public QGLWidget
 {
 public:
 
-    //сейчас просто отвечает за движение пары кубов по эллипсам
-    float t;
-    float shift;
-    float tmp;
+
     //Скорость передвижения камеры
     float MOVE_SPEED;
     //проверять или не проверять столкновение кубов
@@ -49,10 +46,10 @@ public:
 
     //рисует куб с соответствующим id (id сейчас индекс в массиве)
     void drawCube(int id);
-    //сдвигает соответствующий куб на вектор (x, y, z)
-    void move_cube(int id, GLfloat x, GLfloat y, GLfloat z);
-    //перемещает соответствующий куб в точку (x, y, z)
-    void move_cube_to(int id, GLfloat x, GLfloat y, GLfloat z);
+    //сдвигает соответствующий куб на вектор (x, y, z), возвращает true в случае успешного сдвига, и false иначе
+    bool move_cube(int id, GLfloat x, GLfloat y, GLfloat z);
+    //перемещает соответствующий куб в точку (x, y, z), возвращает true в случае успешного сдвига, и false иначе
+    bool move_cube_to(int id, GLfloat x, GLfloat y, GLfloat z);
 
 
     //какие-то технические вещи
@@ -70,8 +67,10 @@ public:
     void turn_right();
     //гравитация, в данный момент заставляет куб падать линейно вниз, если он ни на чем не стоит
     void gravity_check();
-    //проверяет, пересекается ли данный куб с другими (true - пересекается)
-    bool collide_check(int id);
+    //проверяет, пересекается ли данный куб с другими (true - пересекается) + проверка направления
+    bool collide_check(int id, GLfloat x_dir, GLfloat y_dir, GLfloat z_dir);
+    //обработка очереди задач для всех кубов
+    void do_task();
 
 
 

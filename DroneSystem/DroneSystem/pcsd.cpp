@@ -200,7 +200,8 @@ void DroneSystem::MagicFunction(std::string command)
 
     std::random_device rd;
     std::mt19937 mt(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::uniform_real_distribution<double> dist(-20, 20);
+    std::uniform_real_distribution<double> dist(-7, 7);
+    std::uniform_real_distribution<double> u_dist(0, 15);
 
     std::string r_command;
     double x, y, z;
@@ -208,7 +209,7 @@ void DroneSystem::MagicFunction(std::string command)
     {
         x = dist(mt);
         y = dist(mt);
-        z = dist(mt);
+        z = u_dist(mt);
 
         r_command.append("M_");
         r_command.append(std::to_string(x));

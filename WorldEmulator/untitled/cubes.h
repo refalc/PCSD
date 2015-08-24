@@ -18,6 +18,14 @@
 #include<queue>
 #include<deque>
 
+struct task
+{
+    int com;
+    GLfloat x;
+    GLfloat y;
+    GLfloat z;
+};
+
 
 
 class cube : public QObject
@@ -48,8 +56,8 @@ public:
     GLfloat ColorArray[12][3];
     GLubyte IndexArray[20][3];
 
-    //чтобы не делать очереди из сложных элементов, поскольку она будет часто обрабатываться, координаты будут извлекаться по тройкам подряд
-    std::queue<double> task_queue;
+    //ну ты понял
+    std::queue<task> task_queue;
 
     //дефолтный конструктор, создает куб с центром (x, y, z) и ребром длины edge
     cube(GLfloat x = -1.0f, GLfloat y = 0.0f, GLfloat z = 0.0f, GLfloat edge = 1.0f, QObject *parent = 0);
@@ -66,7 +74,11 @@ public:
     void add_path(GLfloat x, GLfloat y, GLfloat z);
 
     //tcp stuff
-     void DoConnect();
+    //Создает сервер и слушает на порт, если кто-то подает запрос на коннект, вызывает слот коннектед.
+    void DoConnect();
+    void SendAnswer(std::string answer);
+    //Если есть коннект = true
+    bool m_Connected;
 
  signals:
 
