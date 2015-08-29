@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include <stdio.h>
-
+#include <string>
 
 
 
@@ -82,7 +82,7 @@ void Scene3D::resizeGL(int nWidth, int nHeight)
         glOrtho(-10.0/ratio, 10.0/ratio, -10.0, 10.0, -10.0, 10.0);
     else
         glOrtho(-10.0, 100.0, -10.0*ratio, 10.0*ratio, -10.0, 10.0);*/
-    glFrustum(-1,1,-1,1, 1.5, 20);
+    glFrustum(-1,1,-1,1, 1, 50);
     glViewport(0, 0, (GLint)nWidth, (GLint)nHeight);
 }
 
@@ -323,37 +323,15 @@ void Scene3D::turn_left()
 
 void Scene3D::gravity_check()
 {
-    for(int i = 0; i < n; i++)
+    for(int i = 1; i < n; i++)
     {
-        if (cubes[i].fixed) continue;
-        if (cubes[i].center_z <= cubes[i].size) continue;
-        float bot = cubes[i].center_z - cubes[i].size;
-        float right_y = cubes[i].center_y + cubes[i].size;
-        float right_x = cubes[i].center_x + cubes[i].size;
-        float left_y = cubes[i].center_y - cubes[i].size;
-        float left_x = cubes[i].center_x - cubes[i].size;
-        //check if there is an object below;
-        bool free = true;
-        for (int j = 0; j < n; j++)
-        {
-            float szj = cubes[j].size;
-            if (i == j) continue;
-            if ((bot <= (cubes[j].center_z + szj +  0.03))&&
-                    (bot >= (cubes[j].center_z + szj - 0.03))
-                && (right_y > cubes[j].center_y - szj) && (left_y < cubes[j].center_y + szj)&&
-                (right_x > cubes[j].center_x - szj) && (left_x < cubes[j].center_x + szj))
-                {
-                    free = false;
-                    break;
-                }
-        }
-        if (free)
-        {
-            cubes[i].center_z -= 0.01;
-            cubes[i].update_coord();
-        }
+        if (cubes[i].fixed)
+            continue;
+        move_cube_to(i, cubes[i].center_x, cubes[i].center_y, cubes[i].center_z - 0.01);
+        //move_cube(i, 0, 0, -0.01);
     }
 }
+
 
 bool Scene3D::collide_check(int id, GLfloat x_dir, GLfloat y_dir, GLfloat z_dir)
 {
@@ -361,16 +339,20 @@ bool Scene3D::collide_check(int id, GLfloat x_dir, GLfloat y_dir, GLfloat z_dir)
     float y = cubes[id].center_y;
     float z = cubes[id].center_z;
     float r = cubes[id].size;
+    float eps = 0;
     for (int i = 0; i < n; i++)
     {
         if (i == id) continue;
-        if ((abs(x - cubes[i].center_x) < r + cubes[i].size) &&
-                (abs(y - cubes[i].center_y) < r + cubes[i].size) &&
-                (abs(z - cubes[i].center_z) < r + cubes[i].size))
+        float x_diff = x - cubes[i].center_x;
+        float y_diff = y - cubes[i].center_y;
+        float z_diff = z - cubes[i].center_z;
+        if ((abs(x_diff) < r + cubes[i].size - eps) &&
+                (abs(y_diff) < r + cubes[i].size - eps) &&
+                (abs(z_diff) < r + cubes[i].size - eps))
         {
-            float scalar_mult = (cubes[i].center_x - x)*x_dir + (cubes[i].center_y - y)*y_dir + (cubes[i].center_y - y)*y_dir;
-            if(scalar_mult > 0)
-                return true;
+
+            //cubes[id].SendAnswer("CollideCheckFail:id = " + std::to_string(id) + " with id = " + std::to_string(i));
+            return true;
         }
 
     }

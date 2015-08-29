@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    std::cout << "start\n";
+    std::cout << "startTestConnection\n";
     TestConnection s(4544);
     //s.Send("CMD_M_1:1:4|");
     s.SpamMove();

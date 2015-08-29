@@ -57,6 +57,7 @@ void DroneSystem::ReadCube()
 
 void DroneSystem::DecodeCommand(std::string command)
 {
+    std::cout << "Decode Command: " << command << std::endl;
     if(command.find("CRD_") != command.npos)
     {
         int pos = command.find("_");
@@ -81,6 +82,7 @@ void DroneSystem::DecodeCommand(std::string command)
     }
     else if(command.find("OK") != command.npos)
     {
+        std::cout << "recive OK\n";
         m_OkTask = true;
     }
     else
@@ -323,8 +325,11 @@ void DroneSystem::Work()
     DecodeCommand("CRD_0.1:0:2|");
     std::cout << "My Crd: X = " << m_Crd[0] << " Y = " << m_Crd[1] << " Z = " << m_Crd[2] << std::endl;
 
+    int counter = 0;
     while(1)
     {
+        if(counter == 10)
+            counter = 0;
         delay(1000);
         if(m_isCoordinator)
         {
@@ -332,8 +337,10 @@ void DroneSystem::Work()
                 DoTaskIteration();
             //generate test task iteration
         }
-        DoSync();
+        if(counter == 0)
+            DoSync();
         DoTask();
+        counter++;
     }
 }
 

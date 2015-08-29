@@ -110,9 +110,10 @@ void SynFrequency::DoConnect()
 void SynFrequency::Connected()
 {
     std::cout << "Connected\n";
-    m_Client = m_Server.nextPendingConnection();
-    connect(m_Client, SIGNAL(readyRead()), this, SLOT(ReadTcp()));
-    m_Client->write("Hello Client\n");
+    int size = m_Clients.size();
+    m_Clients.push_back(m_Server.nextPendingConnection());
+    connect(m_Clients[size], SIGNAL(readyRead()), this, SLOT(ReadTcp(int)));
+    m_Clients[size]->write("Hello Client\n");
 }
 
 void SynFrequency::Disconnected()
@@ -120,12 +121,12 @@ void SynFrequency::Disconnected()
     std::cout << "Disonnected\n";
 }
 
-void SynFrequency::ReadTcp()
+void SynFrequency::ReadTcp(int pos)
 {
     char buffer[1024] = {0};
-    m_Client->read(buffer, m_Client->bytesAvailable());
+    m_Clients[pos]->read(buffer, m_Client->bytesAvailable());
     std::cout << buffer << endl;
-    m_Client->write(buffer);
+    m_Clients[pos]->write(buffer);
     //m_Client->close();
 }
 

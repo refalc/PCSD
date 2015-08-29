@@ -30,12 +30,14 @@ public slots:
     //tcp test
     void Connected();
     void Disconnected();
-    void ReadTcp();
+    void ReadTcp(int pos);
     void Write(qint64 bytes);
 
 protected:
     QTcpServer m_Server;
     QTcpSocket *m_Client;
+
+    std::vector<QTcpSocket*> m_Clients;
     QUdpSocket *m_Socket;
     int m_Port;
     std::map<int, Address> m_Space;
