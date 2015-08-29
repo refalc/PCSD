@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include <stdio.h>
-
+#include <string>
 
 
 
@@ -16,6 +16,7 @@ Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
     timer.start(30, this);
     MOVE_SPEED = 0.1;
     COLLIDE_CHECK = true;
+    ENABLE_FLYING = true;
     eye[0] = -7;
     eye[1] = -5;
     eye[2] = 0.5;
@@ -27,23 +28,30 @@ Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
     normal[2] = 1;
     FILE* f = fopen("starting_settings.txt", "r");
     n = 10;
-    int id;
+    n_d = 1;
+    int id;//fuck it for now
     float x, y, z;
     if (f != NULL)
     {
-    fscanf(f, "%d\n", &n);
-    cubes = new cube [n];
+    fscanf(f, "%d %d\n", &n, &n_d);
+    cubes = new Cube [n];
+    drones = new Drone [n_d];
     for (int i = 0; i < n; i++)
     {
         fscanf(f, "%d %f %f %f", &id, &x, &y, &z);
-        cubes[id].move_to(x, y, z);
+        cubes[i].move_to(x, y, z);
+    }
+    for (int i = 0; i < n_d; i++)
+    {
+        fscanf(f, "%d %f %f %f", &id, &x, &y, &z);
+        drones[i].move_to(x, y, z);
     }
     fclose(f);
     }
     else
     {
         fprintf(commands, "fail, file not found");
-        cubes = new cube[10];
+        cubes = new Cube[10];
     }
     fclose(commands);
     cubes[0].size = 200;
@@ -82,7 +90,7 @@ void Scene3D::resizeGL(int nWidth, int nHeight)
         glOrtho(-10.0/ratio, 10.0/ratio, -10.0, 10.0, -10.0, 10.0);
     else
         glOrtho(-10.0, 100.0, -10.0*ratio, 10.0*ratio, -10.0, 10.0);*/
-    glFrustum(-1,1,-1,1, 1.5, 20);
+    glFrustum(-1,1,-1,1, 1, 50);
     glViewport(0, 0, (GLint)nWidth, (GLint)nHeight);
 }
 
@@ -97,7 +105,7 @@ void Scene3D::paintGL()
     //glRotatef(0, 1.0f, 0.0f, 0.0f);
     gravity_check();
     do_task();
-    for (int i = 0; i < n; i++) drawCube(i);
+    for (int i = 0; i < n + n_d; i++) drawCube(i);
 
 }
 
@@ -156,13 +164,24 @@ void Scene3D::keyPressEvent(QKeyEvent* pe)
         break;
     case Qt::Key_C:
         //cubes[29].add_path(-5, 5, 10);
-        cubes[3].add_path(-5, 3.9, 0.5);
+        //cubes[3].add_path(-5, 3.9, 0.5);
+        //drones[1].add_path(0, 7, 0.5);
+        drones[1].add_path(0, 0, 1.5);
+        drones[1].add_path(0, 8, 1.5);
+        drones[1].add_command(2);
+        drones[1].add_path(0, 8, 4.5);
+        drones[1].add_path(0, 8, 1.6);
+        drones[1].add_path(0, 8, 2.2);
+        drones[1].add_path(0, 0, 2.2);
+        drones[1].add_command(3);
         break;
+
     case Qt::Key_V:
-        cubes[3].add_path(5, 3.9, 0.5);
+        drones[0].add_path(7, 5, 0.5);
+        //cubes[3].add_path(5, 3.9, 0.5);
         break;
     case Qt::Key_F:
-        cubes[4].add_path(0, 5, 0.5);
+        //cubes[4].add_path(0, 5, 0.5);
         break;
 
     default:
@@ -176,59 +195,126 @@ void Scene3D::keyPressEvent(QKeyEvent* pe)
 
 void Scene3D::drawCube(int id)
 {
-    glVertexPointer(3, GL_FLOAT, 0, cubes[id].VertexArray);
-    glColorPointer(3, GL_FLOAT, 0, cubes[id].ColorArray);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubes[id].IndexArray);
+    if (id < n)
+    {
+        glVertexPointer(3, GL_FLOAT, 0, cubes[id].VertexArray);
+        glColorPointer(3, GL_FLOAT, 0, cubes[id].ColorArray);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubes[id].IndexArray);
+    }
+    else
+    {
+        id -= n;
+        glVertexPointer(3, GL_FLOAT, 0, drones[id].VertexArray);
+        glColorPointer(3, GL_FLOAT, 0, drones[id].ColorArray);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, drones[id].IndexArray);
+    }
 }
 
 bool Scene3D::move_cube(int id, GLfloat x, GLfloat y, GLfloat z)
 {
-    if (COLLIDE_CHECK)
+    if (id < n)
     {
-        //меняем координаты центра
-        cubes[id].center_x += x;
-        cubes[id].center_y += y;
-        cubes[id].center_z += z;
-        //если результирующий куб пересекается с чем-нибудь, меняем координаты на старые
-        if (collide_check(id))
+        if (COLLIDE_CHECK)
         {
-            cubes[id].center_x -= x;
-            cubes[id].center_y -= y;
-            cubes[id].center_z -= z;
-            return false;
+            //меняем координаты центра
+            cubes[id].center_x += x;
+            cubes[id].center_y += y;
+            cubes[id].center_z += z;
+            //если результирующий куб пересекается с чем-нибудь, меняем координаты на старые
+            if (collide_check(id, x, y, z))
+            {
+                cubes[id].center_x -= x;
+                cubes[id].center_y -= y;
+                cubes[id].center_z -= z;
+                return false;
+            }
+            //иначе пересчитываем координаты вершин
+            else cubes[id].update_coord();
         }
-        //иначе пересчитываем координаты вершин
-        else cubes[id].update_coord();
+        else cubes[id].move(x, y, z);
+        return true;
     }
-    else cubes[id].move(x, y, z);
-    return true;
+    else
+    {
+        if (COLLIDE_CHECK)
+        {
+            id -= n;
+            //меняем координаты центра
+            drones[id].center_x += x;
+            drones[id].center_y += y;
+            drones[id].center_z += z;
+            //если результирующий куб пересекается с чем-нибудь, меняем координаты на старые
+            if (collide_check(id + n, x, y, z))
+            {
+                drones[id].center_x -= x;
+                drones[id].center_y -= y;
+                drones[id].center_z -= z;
+                return false;
+            }
+            //иначе пересчитываем координаты вершин
+            else drones[id].update_coord();
+        }
+        else drones[id].move(x, y, z);
+        return true;
+    }
 }
 
 bool Scene3D::move_cube_to(int id, GLfloat x, GLfloat y, GLfloat z)
 {
-    if (COLLIDE_CHECK)
+    if (id < n)
     {
-        //меняем координаты центра
-        GLfloat x_old, y_old, z_old;
-        x_old = cubes[id].center_x;
-        y_old = cubes[id].center_y;
-        z_old = cubes[id].center_z;
-        cubes[id].center_x = x;
-        cubes[id].center_y = y;
-        cubes[id].center_z = z;
-        //если результирующий куб пересекается с чем-нибудь, меняем координаты на старые
-        if (collide_check(id))
+        if (COLLIDE_CHECK)
         {
-            cubes[id].center_x = x_old;
-            cubes[id].center_y = y_old;
-            cubes[id].center_z = z_old;
-            return false;
+            //меняем координаты центра
+            GLfloat x_old, y_old, z_old;
+            x_old = cubes[id].center_x;
+            y_old = cubes[id].center_y;
+            z_old = cubes[id].center_z;
+            cubes[id].center_x = x;
+            cubes[id].center_y = y;
+            cubes[id].center_z = z;
+            //если результирующий куб пересекается с чем-нибудь, меняем координаты на старые
+            if (collide_check(id, x - x_old, y - y_old, z - z_old))
+            {
+                cubes[id].center_x = x_old;
+                cubes[id].center_y = y_old;
+                cubes[id].center_z = z_old;
+                return false;
+            }
+            //иначе пересчитываем координаты вершин
+            else cubes[id].update_coord();
         }
-        //иначе пересчитываем координаты вершин
-        else cubes[id].update_coord();
+        else cubes[id].move_to(x, y, z);
+        return true;
     }
-    else cubes[id].move_to(x, y, z);
-    return true;
+    else
+    {
+        if (COLLIDE_CHECK)
+        {
+            id -= n;
+            //меняем координаты центра
+            GLfloat x_old, y_old, z_old;
+            x_old = drones[id].center_x;
+            y_old = drones[id].center_y;
+            z_old = drones[id].center_z;
+            drones[id].center_x = x;
+            drones[id].center_y = y;
+            drones[id].center_z = z;
+            //если результирующий куб пересекается с чем-нибудь, меняем координаты на старые
+            if (collide_check(id + n, x - x_old, y - y_old, z - z_old))
+            {
+                drones[id].center_x = x_old;
+                drones[id].center_y = y_old;
+                drones[id].center_z = z_old;
+                return false;
+            }
+            //иначе пересчитываем координаты вершин
+            else drones[id].update_coord();
+        }
+        else drones[id].move_to(x, y, z);
+        return true;
+    }
+
 }
 
 void Scene3D::move_up()
@@ -318,74 +404,180 @@ void Scene3D::turn_left()
 
 void Scene3D::gravity_check()
 {
-    for(int i = 0; i < n; i++)
+    for(int i = 1; i < n; i++)
     {
-        if (cubes[i].fixed) continue;
-        if (cubes[i].center_z <= cubes[i].size) continue;
-        float bot = cubes[i].center_z - cubes[i].size;
-        float right_y = cubes[i].center_y + cubes[i].size;
-        float right_x = cubes[i].center_x + cubes[i].size;
-        float left_y = cubes[i].center_y - cubes[i].size;
-        float left_x = cubes[i].center_x - cubes[i].size;
-        //check if there is an object below;
-        bool free = true;
-        for (int j = 0; j < n; j++)
-        {
-            float szj = cubes[j].size;
-            if (i == j) continue;
-            if ((bot <= (cubes[j].center_z + szj +  0.03))&&
-                    (bot >= (cubes[j].center_z + szj - 0.03))
-                && (right_y > cubes[j].center_y - szj) && (left_y < cubes[j].center_y + szj)&&
-                (right_x > cubes[j].center_x - szj) && (left_x < cubes[j].center_x + szj))
-                {
-                    free = false;
-                    break;
-                }
-        }
-        if (free)
-        {
-            cubes[i].center_z -= 0.01;
-            cubes[i].update_coord();
-        }
+        if (cubes[i].fixed || cubes[i].flying)
+            continue;
+        move_cube_to(i, cubes[i].center_x, cubes[i].center_y, cubes[i].center_z - 0.01);
+        //move_cube(i, 0, 0, -0.01);
+    }
+    //same for drones
+    if (ENABLE_FLYING) return;
+    for(int i = 0; i < n_d; i++)
+    {
+        if (drones[i].fixed)
+            continue;
+
+        move_cube(i + n_d, 0, 0, -0.01);//move_to не для этих целей, Миша..
     }
 }
 
-bool Scene3D::collide_check(int id)
+
+bool Scene3D::collide_check(int id, GLfloat x_dir, GLfloat y_dir, GLfloat z_dir)
 {
-    float x = cubes[id].center_x;
-    float y = cubes[id].center_y;
-    float z = cubes[id].center_z;
-    float r = cubes[id].size;
+    int ignore;
+    float x, y, z, r;
+    if (id < n)
+    {
+        x = cubes[id].center_x;
+        y = cubes[id].center_y;
+        z = cubes[id].center_z;
+        r = cubes[id].size;
+        ignore = cubes[id].carried_by;
+    }
+    else
+    {
+        x = drones[id-n].center_x;
+        y = drones[id-n].center_y;
+        z = drones[id-n].center_z;
+        r = drones[id-n].size;
+        ignore = drones[id-n].cargo_id;
+    }
+
+
+    float eps = 0.0001;//why not
     for (int i = 0; i < n; i++)
     {
-        if (i == id) continue;
-        if ((abs(x - cubes[i].center_x) < r + cubes[i].size) &&
-                (abs(y - cubes[i].center_y) < r + cubes[i].size) &&
-                (abs(z - cubes[i].center_z) < r + cubes[i].size)) return true;
+        if (i == id || i == ignore) continue;
+        float x_diff = x - cubes[i].center_x;
+        float y_diff = y - cubes[i].center_y;
+        float z_diff = z - cubes[i].center_z;
+        if ((abs(x_diff) < r + cubes[i].size - eps) &&
+                (abs(y_diff) < r + cubes[i].size - eps) &&
+                (abs(z_diff) < r + cubes[i].size - eps))
+        {
+
+            //cubes[id].SendAnswer("CollideCheckFail:id = " + std::to_string(id) + " with id = " + std::to_string(i));
+            return true;
+        }
+
+    }
+    for (int i = 0; i < n_d; i++)
+    {
+        if (i + n == id || i + n == ignore) continue;
+        float x_diff = x - drones[i].center_x;
+        float y_diff = y - drones[i].center_y;
+        float z_diff = z - drones[i].center_z;
+        if ((abs(x_diff) < r + drones[i].size - eps) &&
+                (abs(y_diff) < r + drones[i].size - eps) &&
+                (abs(z_diff) < r + drones[i].size - eps))
+        {
+
+            //cubes[id].SendAnswer("CollideCheckFail:id = " + std::to_string(id) + " with id = " + std::to_string(i));
+            return true;
+        }
 
     }
     return false;
 }
 
-void Scene3D::do_task()
+void Scene3D::do_task()//доработать
 {
     GLfloat x, y, z;
-    for (int i = 0; i < n; i++)
+    int cmd;
+    for (int i = 0; i < n_d; i++)
     {
-        if (cubes[i].task_queue.empty()) continue;
-        x = cubes[i].task_queue.front().x;
-        y = cubes[i].task_queue.front().y;
-        z = cubes[i].task_queue.front().z;
-        if (move_cube(i, x, y, z))
+        if (drones[i].task_queue.empty()) continue;
+        x = drones[i].task_queue.front().x;
+        y = drones[i].task_queue.front().y;
+        z = drones[i].task_queue.front().z;
+        cmd = drones[i].task_queue.front().com;
+        if (cmd < 2)//move command
         {
-            //check cubes[i].task_queue.front().com
-            cubes[i].task_queue.pop();
-            continue;
+            //drone must carry stuff
+            if (drones[i].cargo_id == -1)//empty drone
+            {
+                if (move_cube(i + n, x, y, z))
+                {
+                    //check cubes[i].task_queue.front().com
+                    if(cmd > 0.5)
+                        drones[i].SendAnswer("OK|");
+                    drones[i].task_queue.pop();
+                    continue;
+                }
+                else continue; //fail to move, here should be an error message
+            }
+            else
+            {
+                //move_cube(i+n, x, y, z);
+                //move_cube(drones[i].cargo_id, x, y, z);
+
+                if (move_cube(i+n, x, y, z))
+                {
+                    if (move_cube(drones[i].cargo_id, x, y, z))
+                    {
+                        //if(cmd > 0.5)
+                            //drones[i].SendAnswer("OK|");
+                        drones[i].task_queue.pop();
+                        continue;
+                    }
+                    else
+                    {
+                        //move drone back
+                        move_cube(i+n, -x, -y, -z);
+                        //err
+                        fprintf(commands, "%d err bad move1 ", drones[i].task_queue.size());
+                        continue;
+
+                    }
+                }
+                else
+                {
+                    //err
+                    fprintf(commands, "%d err bad move2 ", drones[i].task_queue.size());
+                    continue;
+                }
+            }
         }
-        //else send some error message or smth
+        if (cmd == 2) capture(i);
+        if (cmd == 3) release(i);
+        fprintf(commands, "%d err", drones[i].task_queue.size());
+        drones[i].task_queue.pop();
 
     }
 }
 
+void Scene3D::release(int id)
+{
+    if (drones[id].cargo_id > -1)
+    {
+        cubes[drones[id].cargo_id].carried_by = -1;
+        cubes[drones[id].cargo_id].flying = false;
+        drones[id].cargo_id = -1;
+    }
 
+}
 
+void Scene3D::capture(int id)
+{
+    if (drones[id].cargo_id > -1) return;// already carrying something
+    //add here search for cubes
+    float x, y, z, r;
+    x = drones[id].center_x;
+    y = drones[id].center_y;
+    z = drones[id].center_z;
+    r = drones[id].size;
+    int target = -1;//id of the cube we're looking for
+    for (int i = 1; i < n; i++)
+    {
+        if (abs(x - cubes[i].center_x) + abs(y - cubes[i].center_y) + abs(z - (cubes[i].center_z + r + cubes[i].size)) < 0.01)
+        {
+            target = i;
+            break;
+        }
+    }
+    if (target < 0) return;//err
+    drones[id].cargo_id = target;
+    cubes[target].carried_by = id+n;
+    cubes[target].flying = true;
+}

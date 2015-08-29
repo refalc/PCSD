@@ -20,7 +20,7 @@
 
 struct task
 {
-    int com;
+    int com;//заменить на enum, но пока 0 - движение, 1 - движение с ответом, 2 - зацепить куб под собой, 3 - отпустить
     GLfloat x;
     GLfloat y;
     GLfloat z;
@@ -28,7 +28,7 @@ struct task
 
 
 
-class cube : public QObject
+class Cube : public QObject
 {
     Q_OBJECT
 
@@ -39,10 +39,10 @@ public:
     int id;
     //скорость кубика
     GLfloat speed;
-    //текущая цель куба, если очередь заданий пуста, то игнорируется
-    GLfloat dest_x;
-    GLfloat dest_y;
-    GLfloat dest_z;
+    //ignores gravity
+    bool flying;
+    //id дрона, несущего куб
+    int carried_by;
     //координаты центра куба
     GLfloat center_x;
     GLfloat center_y;
@@ -56,25 +56,48 @@ public:
     GLfloat ColorArray[12][3];
     GLubyte IndexArray[20][3];
 
-    //ну ты понял
-    std::queue<task> task_queue;
 
     //дефолтный конструктор, создает куб с центром (x, y, z) и ребром длины edge
-    cube(GLfloat x = -1.0f, GLfloat y = 0.0f, GLfloat z = 0.0f, GLfloat edge = 1.0f, QObject *parent = 0);
-    ~cube();
+    Cube(GLfloat x = -1.0f, GLfloat y = 0.0f, GLfloat z = 0.0f, GLfloat edge = 1.0f, QObject *parent = 0);
+    ~Cube();
     //смещает куб на вектор (x, y, z)
     void move(GLfloat x, GLfloat y, GLfloat z);
     //переносит центр куба в точку (x, y, z)
     void move_to(GLfloat x, GLfloat y, GLfloat z);
     //пересчитывает координаты вершин
     void update_coord();
-    //проверяет, есть ли задания в очереди, и если есть, выполняет следующее.
-    void do_task();
+
+};
+
+class Drone : public Cube
+{
+    Q_OBJECT
+public:
+    static int last_id_;
+    //ну ты понял
+    std::queue<task> task_queue;
+
+    //id куба, который в данный момент перетаскивает дрон, -1 если дрон свободен
+    int cargo_id;
+
+    //текущая цель куба, если очередь заданий пуста, то игнорируется
+    GLfloat dest_x;
+    GLfloat dest_y;
+    GLfloat dest_z;
+
+    //дефолтный конструктор, создает куб с центром (x, y, z) и ребром длины edge
+    Drone(GLfloat x = -1.0f, GLfloat y = 0.0f, GLfloat z = 0.0f, GLfloat edge = 1.0f, QObject *parent = 0);
+
     //добавляет в задачи путь от текущей цели до точки (x, y, z) (по прямой)
     void add_path(GLfloat x, GLfloat y, GLfloat z);
-
+    //добавляет разные другие команды в очередь (их пока не много)
+    void add_command(int cmd);
     //tcp stuff
-     void DoConnect();
+    //Создает сервер и слушает на порт, если кто-то подает запрос на коннект, вызывает слот коннектед.
+    void DoConnect();
+    void SendAnswer(std::string answer);
+    //Если есть коннект = true
+    bool m_Connected;
 
  signals:
 
@@ -91,11 +114,8 @@ public:
      //отвечает за порт, использующийся в тсп соединении
      int m_Port;
 
+
 };
 
 
-
-
-
 #endif // CUBES_H
-

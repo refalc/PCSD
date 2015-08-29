@@ -6,14 +6,14 @@
 #include <iostream>
 #include <string>
 
-int cube::last_id = -1;
+int Cube::last_id = -1;
+int Drone::last_id_ = -1;
 
-cube::cube(GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
+Cube::Cube(GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
 {
     speed = 0.1;
     last_id++;
     id = last_id;
-    m_Port = 48120 + id;
     fixed = false;
     center_x = x;
     center_y = y;
@@ -66,11 +66,9 @@ cube::cube(GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent)
         ColorArray[i][1] = (i%8)/9.0f;
         ColorArray[i][2] = (i%8)/9.0f;
     }
-
-    DoConnect();
 }
 
-cube::~cube()
+Cube::~Cube()
 {
     for (int i = 0; i < 8; i++)
     {
@@ -87,7 +85,7 @@ cube::~cube()
     //delete some stuff
 }
 
-void cube::update_coord()
+void Cube::update_coord()
 {
     //updates coordinates of cube vertices based on size and center's coodrinates
     VertexArray[0][0] = center_x - size;
@@ -116,7 +114,7 @@ void cube::update_coord()
     VertexArray[7][2] = center_z + size;
 }
 
-void cube::move(GLfloat x, GLfloat y, GLfloat z)
+void Cube::move(GLfloat x, GLfloat y, GLfloat z)
 {
     center_x += x;
     center_y += y;
@@ -124,7 +122,7 @@ void cube::move(GLfloat x, GLfloat y, GLfloat z)
     update_coord();
 }
 
-void cube::move_to(GLfloat x, GLfloat y, GLfloat z)
+void Cube::move_to(GLfloat x, GLfloat y, GLfloat z)
 {
     center_x = x;
     center_y = y;
@@ -132,7 +130,20 @@ void cube::move_to(GLfloat x, GLfloat y, GLfloat z)
     update_coord();
 }
 
-void cube::DoConnect()
+Drone::Drone(GLfloat x, GLfloat y, GLfloat z, GLfloat edge, QObject *parent):Cube(x, y, z, edge, parent)
+{
+    //
+    flying = false;
+    carried_by = -1;
+    last_id_++;
+    id = last_id_;
+    cargo_id = -1;
+    m_Port = 48120 + id;
+    m_Connected  = false;
+    DoConnect();
+}
+
+void Drone::DoConnect()
 {
     connect(&m_Server, SIGNAL(newConnection()),
         this, SLOT(Connected()));
@@ -141,21 +152,22 @@ void cube::DoConnect()
 
 }
 
-void cube::Connected()
+void Drone::Connected()
 {
     std::cout << "Connected\n";
     m_Client = m_Server.nextPendingConnection(); //m_Client on connection
     connect(m_Client, SIGNAL(readyRead()), this, SLOT(ReadCmd()));  //If recive data call ReadCmd()
-    m_Client->write("Hello Client\n");
+    m_Connected = true;
+    SendAnswer("Hello Client\n");
 }
 
-void cube::Disconnected()
+void Drone::Disconnected()
 {
     //if disconnected
     std::cout << "Disonnected\n";
 }
 
-void cube::ReadCmd()
+void Drone::ReadCmd()
 {
     GLfloat x, y, z;
     //When recive data
@@ -183,7 +195,7 @@ void cube::ReadCmd()
             {
                 std::string answer("Error cmd:");
                 answer.append(buffer);
-                m_Client->write(answer.c_str());
+                SendAnswer(answer);
                 return;
             }
             symb = cmd[pos];
@@ -201,7 +213,7 @@ void cube::ReadCmd()
             {
                 std::string answer("Error cmd:");
                 answer.append(buffer);
-                m_Client->write(answer.c_str());
+                SendAnswer(answer);
                 return;
             }
             symb = cmd[pos];
@@ -219,7 +231,7 @@ void cube::ReadCmd()
             {
                 std::string answer("Error cmd:");
                 answer.append(buffer);
-                m_Client->write(answer.c_str());
+                SendAnswer(answer);
                 return;
             }
             symb = cmd[pos];
@@ -234,22 +246,28 @@ void cube::ReadCmd()
         answer.push_back(' ');
         answer.append(std::to_string(z));
         answer.push_back(' ');
-        //m_Client->write(answer.c_str());
+        SendAnswer(answer);
     }
     else
     {
         std::string answer("Error cmd:");
         answer.append(buffer);
-        m_Client->write(answer.c_str());
+        SendAnswer(answer);
     }
     //Do Task there
     //add_path(x, y, z);
+//TODO: добавить в парсер возможность других команд, кроме движения, исп add_command(int);
 
 }
 
 
+void Drone::SendAnswer(std::string answer)
+{
+    if(m_Connected)
+        m_Client->write(answer.c_str());
+}
 
-void cube::add_path(GLfloat x, GLfloat y, GLfloat z)
+void Drone::add_path(GLfloat x, GLfloat y, GLfloat z)
 {
     task tsk;
     if (task_queue.empty())
@@ -279,4 +297,14 @@ void cube::add_path(GLfloat x, GLfloat y, GLfloat z)
     dest_x = x;
     dest_y = y;
     dest_z = z;
+}
+
+void Drone::add_command(int cmd)
+{
+    task tsk;
+    tsk.com = cmd;
+    tsk.x = 0;
+    tsk.y = 0;
+    tsk.z = 0;
+    task_queue.push(tsk);
 }
