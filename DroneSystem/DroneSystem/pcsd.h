@@ -10,21 +10,21 @@ class DroneSystem : QObject
     Q_OBJECT
 public:
 
-    DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject *parent = 0);
+    DroneSystem(int ID, int SUPort, int TCPPort, const Address &Syn, QObject *parent = 0);
     void DoSync();
     void Work();
 
 private:
-    bool IsEqualState(std::map<int, Address> &state);
+    bool IsEqualState(const std::map<int, Address> &state) const;
     void SendIDToSync();
-    void SendNext(QByteArray &data);
-    void DecodeTask(std::string inputData);
+    void SendNext(const QByteArray &data);
+    void DecodeTask(const std::string &inputData) const;
     void DoTaskIteration();
-    void SendCube(std::string command);
+    void SendCube(const std::string &command);
     void DoTask();
-    void DecodeCommand(std::string command);
+    void DecodeCommand(const std::string &command);
 
-    void MagicFunction(std::string data);
+    void MagicFunction(const std::string &data);
 
 signals:
 

@@ -16,8 +16,8 @@ public:
     SynFrequency(int port, QObject *parent = 0);
     void Start();
     void Close();
-    void Send(Address dst);
-    void Send(std::string data);
+    void Send(const Address &dst);
+    void Send(const std::string &data);
 
     //tcp test
     void DoConnect();

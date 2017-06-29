@@ -10,7 +10,7 @@ void delay(int m)
     while (QTime::currentTime() < dieTime)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }
-std::string DataToStr(std::map<int, Address> &data)
+std::string DataToStr(const std::map<int, Address> &data)
 {
     char buff[6];
     std::string res;
@@ -28,7 +28,7 @@ std::string DataToStr(std::map<int, Address> &data)
     return res;
 }
 
-std::map<int, Address> StrToData(std::string &str)
+std::map<int, Address> StrToData(const std::string &str)
 {
     std::map<int, Address> data;
     Address tempData;

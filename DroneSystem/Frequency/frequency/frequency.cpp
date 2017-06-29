@@ -79,7 +79,7 @@ void SynFrequency::Read()
     }
 }
 
-void SynFrequency::Send(Address dst)
+void SynFrequency::Send(const Address &dst)
 {
     QByteArray Data;
     Data.append(DataToStr(m_Space).c_str());
@@ -87,7 +87,7 @@ void SynFrequency::Send(Address dst)
     m_Socket->writeDatagram(Data, QHostAddress(dst.IP.c_str()), dst.PORT);
 }
 
-void SynFrequency::Send(std::string data)
+void SynFrequency::Send(const std::string &data)
 {
     QByteArray Data(data.c_str());
     for(auto it = m_Space.begin(), it_end = m_Space.end(); it != it_end; it++)

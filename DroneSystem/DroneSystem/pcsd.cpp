@@ -4,7 +4,7 @@
 #include <random>
 #include <chrono>
 
-DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, Address &Syn, QObject *parent) : QObject(parent), m_ID(ID), m_SynF(Syn)
+DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, const Address &Syn, QObject *parent) : QObject(parent), m_ID(ID), m_SynF(Syn)
 {
     m_isCoordinator = false;
     m_Alone = true;
@@ -55,7 +55,7 @@ void DroneSystem::ReadCube()
     DecodeCommand(m_TcpSocket->readAll().toStdString());
 }
 
-void DroneSystem::DecodeCommand(std::string command)
+void DroneSystem::DecodeCommand(const std::string &command)
 {
     std::cout << "Decode Command: " << command << std::endl;
     if(command.find("CRD_") != command.npos)
@@ -91,7 +91,7 @@ void DroneSystem::DecodeCommand(std::string command)
     }
 }
 
-void DroneSystem::SendCube(std::string command)
+void DroneSystem::SendCube(const std::string &command)
 {
     m_TcpSocket->write(command.c_str());
 }
@@ -194,7 +194,7 @@ void DroneSystem::ReadFromSynUDP()
     }
 }
 
-void DroneSystem::MagicFunction(std::string command)
+void DroneSystem::MagicFunction(const std::string &command)
 {
     //need algorithm
     std::cout << "Magic Function get command: " << command << std::endl;
@@ -254,7 +254,7 @@ void DroneSystem::ReadFromLastDrone()
     }
 }
 
-void DroneSystem::DecodeTask(std::string inputData)
+void DroneSystem::DecodeTask(const std::string &inputData) const
 {
     std::string strID, strTask;
     int ID;
@@ -307,7 +307,7 @@ void DroneSystem::SendNext(QByteArray &data)
     m_CrossDroneUdpSocket->writeDatagram(data, QHostAddress(m_NextDrone.IP.c_str()), m_NextDrone.PORT);
 }
 
-bool DroneSystem::IsEqualState(std::map<int, Address> &state)
+bool DroneSystem::IsEqualState(const std::map<int, Address> &state) const
 {
     std::string strSt1 = DataToStr(state);
     std::string strSt2 = DataToStr(m_DronesSpace);

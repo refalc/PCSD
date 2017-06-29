@@ -19,8 +19,8 @@ struct Address
 //
 
 //functions there
-std::string DataToStr(std::map<int, Address> & data);
-std::map<int, Address> StrToData(std::string &str);
+std::string DataToStr(const std::map<int, Address> & data);
+std::map<int, Address> StrToData(const std::string &str);
 void delay(int m);
 //
 
