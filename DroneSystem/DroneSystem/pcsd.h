@@ -18,7 +18,7 @@ private:
     bool IsEqualState(const std::map<int, Address> &state) const;
     void SendIDToSync();
     void SendNext(const QByteArray &data);
-    void DecodeTask(const std::string &inputData) const;
+    void DecodeTask(const std::string &inputData);
     void DoTaskIteration();
     void SendCube(const std::string &command);
     void DoTask();

@@ -11,7 +11,7 @@
 class CTestConnectionReciever : public CNetworkObject
 {
 public:
-    CTestConnection(int cur_port_1, int cur_port_2);
+    CTestConnectionReciever(int cur_port_1, int cur_port_2);
     void Work();
 
 private:

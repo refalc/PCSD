@@ -57,17 +57,17 @@ void SynFrequency::Read()
             }
             //
 
-            data.ID = strID.toInt();
-            data.IP = sender.toString().toStdString().substr(7);
-            data.PORT = strPORT.toInt();
+            data.m_iID = strID.toInt();
+            data.m_IP = sender.toString().toStdString().substr(7);
+            data.m_iPort = strPORT.toInt();
 
-            if(m_Space.find(data.ID) == m_Space.end())
+            if(m_Space.find(data.m_iID) == m_Space.end())
             {
-                m_Space[data.ID] = data;
-                data.PORT = senderPort;
-                std::cout << "Data from:\n  ID = " << data.ID << "\n    IP = " << data.IP << "\n    PORT = " << data.PORT << "\n";
+                m_Space[data.m_iID] = data;
+                data.m_iPort = senderPort;
+                std::cout << "Data from:\n  ID = " << data.m_iID << "\n    IP = " << data.m_IP << "\n    PORT = " << data.m_iPort << "\n";
             }
-            data.PORT = senderPort;
+            data.m_iPort = senderPort;
             Send(data);
         }
         else
@@ -84,7 +84,7 @@ void SynFrequency::Send(const Address &dst)
     QByteArray Data;
     Data.append(DataToStr(m_Space).c_str());
     //std::cout << "Send to " << dst.IP.c_str()  << " PORT " << dst.PORT << " " << Data.toStdString() << std::endl;
-    m_Socket->writeDatagram(Data, QHostAddress(dst.IP.c_str()), dst.PORT);
+    m_Socket->writeDatagram(Data, QHostAddress(dst.m_IP.c_str()), dst.m_iPort);
 }
 
 void SynFrequency::Send(const std::string &data)
@@ -92,7 +92,7 @@ void SynFrequency::Send(const std::string &data)
     QByteArray Data(data.c_str());
     for(auto it = m_Space.begin(), it_end = m_Space.end(); it != it_end; it++)
     {
-        m_Socket->writeDatagram(Data, QHostAddress(it->second.IP.c_str()), it->second.PORT-1);
+        m_Socket->writeDatagram(Data, QHostAddress(it->second.m_IP.c_str()), it->second.m_iPort-1);
     }
 }
 

@@ -11,9 +11,9 @@ int main(int argc, char *argv[])
         int p = atoi(argv[2]);
         int tcp_p = atoi(argv[3]);
         Address adr;
-        adr.ID = -1;
-        adr.IP = "127.0.0.1";
-        adr.PORT = 4545;
+        adr.m_iID = -1;
+        adr.m_IP = "127.0.0.1";
+        adr.m_iPort = 4545;
         DroneSystem DS(i, p, tcp_p, adr);
         DS.Work();
         std::cout << "ok\n";

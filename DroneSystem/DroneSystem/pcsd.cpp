@@ -35,7 +35,7 @@ DroneSystem::DroneSystem(int ID, int SUPort, int TCPPort, const Address &Syn, QO
         std::cout << "Error: " << m_TcpSocket->errorString().toStdString() << std::endl;
     }
 
-    std::cout << m_SynF.IP << " " << m_SynF.PORT << std::endl;
+    std::cout << m_SynF.m_IP << " " << m_SynF.m_iPort << std::endl;
 }
 
 void DroneSystem::ConnectedCube()
@@ -158,35 +158,35 @@ void DroneSystem::ReadFromSynUDP()
                 if(!m_isCoordinator)
                 {
                     it++;
-                    m_NextDrone.ID = m_DronesSpace[*it].ID;
-                    m_NextDrone.IP = m_DronesSpace[*it].IP;
-                    m_NextDrone.PORT = m_DronesSpace[*it].PORT;
+                    m_NextDrone.m_iID = m_DronesSpace[*it].m_iID;
+                    m_NextDrone.m_IP = m_DronesSpace[*it].m_IP;
+                    m_NextDrone.m_iPort = m_DronesSpace[*it].m_iPort;
                     it--;
                 }
                 else
                 {
-                    m_NextDrone.ID = m_DronesSpace[m_DroneIDs[0]].ID;
-                    m_NextDrone.IP = m_DronesSpace[m_DroneIDs[0]].IP;
-                    m_NextDrone.PORT = m_DronesSpace[m_DroneIDs[0]].PORT;
+                    m_NextDrone.m_iID = m_DronesSpace[m_DroneIDs[0]].m_iID;
+                    m_NextDrone.m_IP = m_DronesSpace[m_DroneIDs[0]].m_IP;
+                    m_NextDrone.m_iPort = m_DronesSpace[m_DroneIDs[0]].m_iPort;
                 }
 
                 //Last Drone Address
                 if(it != m_DroneIDs.begin())
                 {
                     it--;
-                    m_LastDrone.ID = m_DronesSpace[*it].ID;
-                    m_LastDrone.IP = m_DronesSpace[*it].IP;
-                    m_LastDrone.PORT = m_DronesSpace[*it].PORT;
+                    m_LastDrone.m_iID = m_DronesSpace[*it].m_iID;
+                    m_LastDrone.m_IP = m_DronesSpace[*it].m_IP;
+                    m_LastDrone.m_iPort = m_DronesSpace[*it].m_iPort;
                     it++;
                 }
                 else
                 {
-                    m_LastDrone.ID = m_DronesSpace[m_DroneIDs[m_DroneIDs.size()-1]].ID;
-                    m_LastDrone.IP = m_DronesSpace[m_DroneIDs[m_DroneIDs.size()-1]].IP;
-                    m_LastDrone.PORT = m_DronesSpace[m_DroneIDs[m_DroneIDs.size()-1]].PORT;
+                    m_LastDrone.m_iID = m_DronesSpace[m_DroneIDs[m_DroneIDs.size()-1]].m_iID;
+                    m_LastDrone.m_IP = m_DronesSpace[m_DroneIDs[m_DroneIDs.size()-1]].m_IP;
+                    m_LastDrone.m_iPort = m_DronesSpace[m_DroneIDs[m_DroneIDs.size()-1]].m_iPort;
                 }
 
-                std::cout << "My Last NB have ID " << m_LastDrone.ID << "\nMy Next NB have ID " << m_NextDrone.ID << std::endl;
+                std::cout << "My Last NB have ID " << m_LastDrone.m_iID << "\nMy Next NB have ID " << m_NextDrone.m_iID << std::endl;
 
             }
             std::cout << "State changed...\nNow we have " << m_DronesSpace.size() << "\n" << tempStr << std::endl;
@@ -239,7 +239,7 @@ void DroneSystem::ReadFromLastDrone()
         quint16 senderPort;
         m_CrossDroneUdpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-        if(QHostAddress(sender.toString().toStdString().substr(7).c_str()) == QHostAddress(m_LastDrone.IP.c_str()) && senderPort == m_LastDrone.PORT)
+        if(QHostAddress(sender.toString().toStdString().substr(7).c_str()) == QHostAddress(m_LastDrone.m_IP.c_str()) && senderPort == m_LastDrone.m_iPort)
         {
             DecodeTask(buffer.toStdString());
             if(!m_isCoordinator)
@@ -247,14 +247,14 @@ void DroneSystem::ReadFromLastDrone()
         }
         else
         {
-            std::cout << "Error: another sender:\n   Last Drone IP = " << m_LastDrone.IP <<"\n   Last Drone PORT = " << m_LastDrone.PORT
+            std::cout << "Error: another sender:\n   Last Drone IP = " << m_LastDrone.m_IP <<"\n   Last Drone PORT = " << m_LastDrone.m_iPort
                       << "\n   Sender IP = " << sender.toString().toStdString() << "\n   Sender PORT = " << senderPort << std::endl;
         }
 
     }
 }
 
-void DroneSystem::DecodeTask(const std::string &inputData) const
+void DroneSystem::DecodeTask(const std::string &inputData)
 {
     std::string strID, strTask;
     int ID;
@@ -302,9 +302,9 @@ void DroneSystem::DecodeTask(const std::string &inputData) const
     }
 }
 
-void DroneSystem::SendNext(QByteArray &data)
+void DroneSystem::SendNext(const QByteArray &data)
 {
-    m_CrossDroneUdpSocket->writeDatagram(data, QHostAddress(m_NextDrone.IP.c_str()), m_NextDrone.PORT);
+    m_CrossDroneUdpSocket->writeDatagram(data, QHostAddress(m_NextDrone.m_IP.c_str()), m_NextDrone.m_iPort);
 }
 
 bool DroneSystem::IsEqualState(const std::map<int, Address> &state) const
@@ -388,5 +388,5 @@ void DroneSystem::SendIDToSync()
     Data.append(QString::number(m_ID));
     Data.append(" ");
     Data.append(QString::number(m_CrossDroneUdpPort));
-    m_SynUdpSocket->writeDatagram(Data,QHostAddress(m_SynF.IP.c_str()), m_SynF.PORT);
+    m_SynUdpSocket->writeDatagram(Data,QHostAddress(m_SynF.m_IP.c_str()), m_SynF.m_iPort);
 }
