@@ -1,6 +1,6 @@
 #include "networkobject.h"
-
+#include <iostream>
 void CNetworkObject::AddPendingDataFromNC(NetworkDataFromNS &&data)
 {
-    m_Querry.push(std::move(data));
+    m_Query.push(std::move(data));
 }

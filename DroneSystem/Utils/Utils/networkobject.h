@@ -7,6 +7,6 @@ class CNetworkObject : public INetworkObject
 public:
     virtual void AddPendingDataFromNC(NetworkDataFromNS &&data) override;
 
-private:
+protected:
     std::queue<NetworkDataFromNS> m_Query;
 };

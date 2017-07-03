@@ -27,3 +27,10 @@
 *.out
 *.app
 *.user
+*.Release
+*.Debug
+DroneSystem/build-TestConnection-Desktop_Qt_5_4_2_MinGW_32bit2-Debug/debug/moc_networkconnection.cpp
+DroneSystem/build-TestConnection-Desktop_Qt_5_4_2_MinGW_32bit2-Debug/Makefile
+DroneSystem/build-TestConnection-Desktop_Qt_5_4_2_MinGW_32bit2-Release/Makefile
+DroneSystem/build-TestConnection-Desktop_Qt_5_4_2_MinGW_32bit2-Release/release/moc_networkconnection.cpp
+*.user

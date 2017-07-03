@@ -20,8 +20,10 @@ std::unique_ptr<INetworkConnection> CNetworkConnectionFactory::CreateConnection(
     switch( type ) {
     case SocketType::UDP:
         return std::unique_ptr<INetworkConnection>(new CNetworkConnectionUDP(network_object, port, m_iBuildedCounter++));
-    case SocketType::TCP:
-        return std::unique_ptr<INetworkConnection>(new CNetworkConnectionTCP(network_object, port, m_iBuildedCounter++));
+    case SocketType::TCP_Client:
+        return std::unique_ptr<INetworkConnection>(new CNetworkConnectionTCPClient(network_object, port, m_iBuildedCounter++));
+    case SocketType::TCP_Server:
+        return std::unique_ptr<INetworkConnection>(new CNetworkConnectionTCPServer(network_object, port, m_iBuildedCounter++));
     }
 
     return nullptr;

@@ -17,8 +17,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     ../Utils/Utils/utils.cpp \
-    testconnection.cpp
+    testconnection.cpp \
+    ../Utils/Utils/cnetworkconnectionfactory.cpp \
+    ../Utils/Utils/networkconnection.cpp \
+    ../Utils/Utils/networkobject.cpp
 
 HEADERS += \
     ../Utils/Utils/utils.h \
-    testconnection.h
+    testconnection.h \
+    ../Utils/Utils/cnetworkconnectionfactory.h \
+    ../Utils/Utils/networkconnection.h \
+    ../Utils/Utils/networkobject.h

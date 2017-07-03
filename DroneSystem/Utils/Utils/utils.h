@@ -22,7 +22,8 @@ typedef std::pair<int, CNetworkData> NetworkDataFromNS;
 enum class SocketType
 {
     UDP = 0,
-    TCP = 1,
+    TCP_Client = 1,
+    TCP_Server = 2,
 };
 
 enum class ErrCode
@@ -45,7 +46,7 @@ void split_string_by_delim(const std::string &str, char delim, std::vector<std::
 struct Address
 {
     Address() : m_iID(0), m_IP(""), m_iPort(0){}
-    Address(int id, const std::string &ip, int port) : m_iID(id), m_IP(""), m_iPort(0){}
+    Address(int id, const std::string &ip, int port) : m_iID(id), m_IP(ip), m_iPort(port){}
     int m_iID;
     std::string m_IP;
     int m_iPort;
@@ -80,6 +81,11 @@ class INetworkConnection
 {
 public:
     virtual ErrCode Send(const CNetworkData &data) = 0;
+    virtual int GetConnectionID() = 0;
+    // for tcp
+    virtual ErrCode Listen(const std::string &from = std::string("")) = 0;
+    virtual ErrCode ConnectTo(const Address &address, long wait_millsec) = 0;
+
 };
 
 class INetworkConnectionFactory
